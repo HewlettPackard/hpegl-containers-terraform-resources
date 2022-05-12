@@ -7,7 +7,7 @@ terraform {
       # In this example it is caas (see "source" below).  The service-specific replacement
       # to caas must be specified in "source" below and also in the Makefile as the
       # value of DUMMY_PROVIDER.
-      source  = "terraform.example.com/caas/hpegl"
+      source  = "hpe/hpegl"
       version = ">= 0.0.1"
     }
   }
