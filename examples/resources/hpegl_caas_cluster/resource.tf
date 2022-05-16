@@ -8,7 +8,7 @@ terraform {
       # to caas must be specified in "source" below and also in the Makefile as the
       # value of DUMMY_PROVIDER.
       source  = "hpe/hpegl"
-      version = ">= 0.0.1"
+      version = ">= 0.2.0"
     }
   }
 }
