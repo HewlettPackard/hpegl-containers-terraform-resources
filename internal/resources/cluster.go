@@ -95,7 +95,8 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 
 	cluster, resp, err := c.CaasClient.ClusterAdminApi.ClustersPost(clientCtx, createCluster)
 	if err != nil {
-		diags = append(diags, diag.Errorf("Error in ClustersPost: %s", err)...)
+		errMessage := getErrorMessage(err, resp.StatusCode)
+		diags = append(diags, diag.Errorf("Error in ClustersPost: %s-%s", err, errMessage)...)
 
 		return diags
 	}
@@ -398,4 +399,25 @@ func isErrRetryable(err error) bool {
 	}
 
 	return false
+}
+
+func getErrorMessage(err error, statusCode int) string {
+	swaggerErr, _ := err.(mcaasapi.GenericSwaggerError)
+
+	switch statusCode {
+	case 400:
+		errMessage, _ := swaggerErr.Model().(mcaasapi.BadRequestError)
+		return errMessage.Message
+	case 401:
+		errMessage, _ := swaggerErr.Model().(mcaasapi.AuthenticationError)
+		return errMessage.Message
+	case 422:
+		errMessage, _ := swaggerErr.Model().(mcaasapi.UnprocessingEntityError)
+		return errMessage.Message
+	case 500:
+		errMessage, _ := swaggerErr.Model().(mcaasapi.InternalError)
+		return errMessage.Message
+	default:
+		return ""
+	}
 }
