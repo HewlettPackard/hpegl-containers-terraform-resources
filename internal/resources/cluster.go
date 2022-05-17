@@ -403,20 +403,16 @@ func isErrRetryable(err error) bool {
 
 func getErrorMessage(err error, statusCode int) string {
 	swaggerErr, _ := err.(mcaasapi.GenericSwaggerError)
-
+	model := swaggerErr.Model()
 	switch statusCode {
 	case 400:
-		errMessage, _ := swaggerErr.Model().(mcaasapi.BadRequestError)
-		return errMessage.Message
+		return model.(mcaasapi.BadRequestError).Message
 	case 401:
-		errMessage, _ := swaggerErr.Model().(mcaasapi.AuthenticationError)
-		return errMessage.Message
+		return model.(mcaasapi.AuthenticationError).Message
 	case 422:
-		errMessage, _ := swaggerErr.Model().(mcaasapi.UnprocessingEntityError)
-		return errMessage.Message
+		return model.(mcaasapi.UnprocessingEntityError).Message
 	case 500:
-		errMessage, _ := swaggerErr.Model().(mcaasapi.InternalError)
-		return errMessage.Message
+		return model.(mcaasapi.InternalError).Message
 	default:
 		return ""
 	}
