@@ -16,6 +16,7 @@ import (
 	"github.com/HewlettPackard/hpegl-containers-go-sdk/pkg/mcaasapi"
 
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/resources/schemas"
+	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/utils"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/auth"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/client"
 )
@@ -95,8 +96,8 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 
 	cluster, resp, err := c.CaasClient.ClusterAdminApi.ClustersPost(clientCtx, createCluster)
 	if err != nil {
-		errMessage := getErrorMessage(err, resp.StatusCode)
-		diags = append(diags, diag.Errorf("Error in ClustersPost: %s-%s", err, errMessage)...)
+		errMessage := utils.GetErrorMessage(err, resp.StatusCode)
+		diags = append(diags, diag.Errorf("Error in ClustersPost: %s - %s", err, errMessage)...)
 
 		return diags
 	}
@@ -399,21 +400,4 @@ func isErrRetryable(err error) bool {
 	}
 
 	return false
-}
-
-func getErrorMessage(err error, statusCode int) string {
-	swaggerErr, _ := err.(mcaasapi.GenericSwaggerError)
-	model := swaggerErr.Model()
-	switch statusCode {
-	case 400:
-		return model.(mcaasapi.BadRequestError).Message
-	case 401:
-		return model.(mcaasapi.AuthenticationError).Message
-	case 422:
-		return model.(mcaasapi.UnprocessingEntityError).Message
-	case 500:
-		return model.(mcaasapi.InternalError).Message
-	default:
-		return ""
-	}
 }
