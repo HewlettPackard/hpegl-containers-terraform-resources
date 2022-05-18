@@ -7,7 +7,7 @@ func GetErrorMessage(err error, statusCode int) string {
 	if !ok {
 		return ""
 	}
-	
+
 	model := swaggerErr.Model()
 	switch statusCode {
 	case 400:
