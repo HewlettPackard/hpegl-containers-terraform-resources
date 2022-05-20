@@ -23,6 +23,6 @@ provider hpegl {
 resource hpegl_caas_cluster test {
   name         = var.cluster_name
   blueprint_id = ""
-  appliance_id = ""
+  site_id = ""
   space_id     = ""
 }
