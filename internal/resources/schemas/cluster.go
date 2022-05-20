@@ -73,7 +73,7 @@ func Cluster() map[string]*schema.Schema {
 			ForceNew: true,
 			Computed: true,
 		},
-		"appliance_id": {
+		"site_id": {
 			Type:     schema.TypeString,
 			Required: true,
 			ForceNew: true,

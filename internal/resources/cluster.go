@@ -68,7 +68,7 @@ func Cluster() *schema.Resource {
 		Description: `The cluster resource facilitates the creation and
 			deletion of a CaaS cluster.  Update is currently not supported.  There
 			are four required inputs when creating a cluster - name, blueprint-id,
-			appliance-id and space-id`,
+			site-id and space-id`,
 	}
 }
 
@@ -90,7 +90,7 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 	createCluster := mcaasapi.CreateCluster{
 		Name:               d.Get("name").(string),
 		ClusterBlueprintId: d.Get("blueprint_id").(string),
-		ApplianceID:        d.Get("appliance_id").(string),
+		ApplianceID:        d.Get("site_id").(string),
 		SpaceID:            spaceID,
 	}
 
@@ -235,7 +235,7 @@ func writeClusterResourceValues(d *schema.ResourceData, cluster *mcaasapi.Cluste
 		return err
 	}
 
-	if err = d.Set("appliance_id", cluster.ApplianceID); err != nil {
+	if err = d.Set("site_id", cluster.ApplianceID); err != nil {
 		return err
 	}
 

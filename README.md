@@ -305,7 +305,7 @@ Update examples/cluster-create/main.tf with values for
 
 ```bash
 blueprint_id =<blueprint id>
-appliance_id =<appliance id>
+site_id =<site id>
 space_id     =<space id>
 ```
 To create the terraform plan:

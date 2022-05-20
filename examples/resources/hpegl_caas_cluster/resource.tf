@@ -24,7 +24,7 @@ data "hpegl_caas_cluster_blueprint" "bp" {
   space_id = ""
 }
 
-data "hpegl_caas_appliance" "blr" {
+data "hpegl_caas_site" "blr" {
   name = "BLR"
   space_id = ""
 }
@@ -32,6 +32,6 @@ data "hpegl_caas_appliance" "blr" {
 resource hpegl_caas_cluster test {
   name         = "tf-test"
   blueprint_id = data.hpegl_caas_cluster_blueprint.bp.id
-  appliance_id = data.hpegl_caas_appliance.blr.id
+  site_id = data.hpegl_caas_site.blr.id
   space_id     = ""
 }
