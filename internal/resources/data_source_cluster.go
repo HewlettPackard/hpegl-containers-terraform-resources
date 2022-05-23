@@ -16,7 +16,7 @@ import (
 
 func DataSourceCluster() *schema.Resource {
 	return &schema.Resource{
-		Schema:             schemas.Cluster(),
+		Schema:             schemas.DataCluster(),
 		ReadContext:        dataSourceClusterReadContext,
 		SchemaVersion:      0,
 		StateUpgraders:     nil,

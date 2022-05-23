@@ -11,37 +11,30 @@ func Cluster() map[string]*schema.Schema {
 		},
 		"health": {
 			Type:     schema.TypeString,
-			ForceNew: true,
 			Computed: true,
 		},
 		"created_date": {
 			Type:     schema.TypeString,
-			ForceNew: true,
 			Computed: true,
 		},
 		"last_update_date": {
 			Type:     schema.TypeString,
-			ForceNew: true,
 			Computed: true,
 		},
 		"name": {
 			Type:     schema.TypeString,
 			Required: true,
-			ForceNew: true,
 		},
 		"blueprint_id": {
 			Type:     schema.TypeString,
 			Required: true,
-			ForceNew: true,
 		},
 		"k8s_version": {
 			Type:     schema.TypeString,
-			ForceNew: true,
 			Computed: true,
 		},
 		"cluster_provider": {
 			Type:     schema.TypeString,
-			ForceNew: true,
 			Computed: true,
 		},
 		"machine_sets": {
@@ -49,7 +42,6 @@ func Cluster() map[string]*schema.Schema {
 			Elem: &schema.Resource{
 				Schema: MachineSets(),
 			},
-			ForceNew: true,
 			Computed: true,
 		},
 		"machine_sets_detail": {
@@ -57,45 +49,127 @@ func Cluster() map[string]*schema.Schema {
 			Elem: &schema.Resource{
 				Schema: MachineSetsDetail(),
 			},
-			ForceNew: true,
 			Computed: true,
 		},
 		"api_endpoint": {
 			Type:     schema.TypeString,
 			Computed: true,
-			ForceNew: true,
 		},
 		"service_endpoints": {
 			Type: schema.TypeList,
 			Elem: &schema.Resource{
 				Schema: ServiceEndpoints(),
 			},
-			ForceNew: true,
 			Computed: true,
 		},
 		"site_id": {
 			Type:     schema.TypeString,
 			Required: true,
-			ForceNew: true,
 		},
 		"appliance_name": {
 			Type:     schema.TypeString,
-			ForceNew: true,
 			Computed: true,
 		},
 		"space_id": {
 			Type:     schema.TypeString,
 			Required: true,
-			ForceNew: true,
 		},
 		"default_storage_class": {
 			Type:     schema.TypeString,
-			ForceNew: true,
 			Computed: true,
 		},
 		"default_storage_class_description": {
 			Type:     schema.TypeString,
-			ForceNew: true,
+			Computed: true,
+		},
+		"kubeconfig": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+	}
+}
+
+func DataCluster() map[string]*schema.Schema {
+	return map[string]*schema.Schema{
+		"name": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"space_id": {
+			Type:     schema.TypeString,
+			Required: true,
+		},
+		"state": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"health": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"created_date": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"last_update_date": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"blueprint_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"k8s_version": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"cluster_provider": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"machine_sets": {
+			Type: schema.TypeList,
+			Elem: &schema.Resource{
+				Schema: MachineSets(),
+			},
+			Computed: true,
+		},
+		"machine_sets_detail": {
+			Type: schema.TypeList,
+			Elem: &schema.Resource{
+				Schema: MachineSetsDetail(),
+			},
+			Computed: true,
+		},
+		"api_endpoint": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"service_endpoints": {
+			Type: schema.TypeList,
+			Elem: &schema.Resource{
+				Schema: ServiceEndpoints(),
+			},
+			Computed: true,
+		},
+		"site_id": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"appliance_name": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"default_storage_class": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"default_storage_class_description": {
+			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"kubeconfig": {
+			Type:     schema.TypeString,
 			Computed: true,
 		},
 	}

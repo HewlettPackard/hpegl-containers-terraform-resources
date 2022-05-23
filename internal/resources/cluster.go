@@ -52,6 +52,7 @@ func Cluster() *schema.Resource {
 		StateUpgraders: nil,
 		CreateContext:  clusterCreateContext,
 		ReadContext:    clusterReadContext,
+		UpdateContext:  clusterUpdateContext,
 		// TODO figure out if a cluster can be updated
 		// Update:             clusterUpdate,
 		DeleteContext: clusterDeleteContext,
@@ -409,4 +410,9 @@ func isErrRetryable(err error) bool {
 	}
 
 	return false
+}
+
+func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	return diags
 }
