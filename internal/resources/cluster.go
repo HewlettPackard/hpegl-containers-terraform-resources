@@ -168,6 +168,15 @@ func clusterReadContext(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(err)
 	}
 
+	kubeconfig, _, err := c.CaasClient.ClusterAdminApi.V1ClustersIdKubeconfigGet(clientCtx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err = d.Set("kubeconfig", kubeconfig.Kubeconfig); err != nil {
+		return diag.FromErr(err)
+	}
+
 	return diags
 }
 
