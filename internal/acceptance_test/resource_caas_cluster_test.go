@@ -118,14 +118,14 @@ func testCaasClusterDestroy(name string) resource.TestCheckFunc {
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 
 		var cluster *mcaasapi.Cluster
-		clusters, _, err := p.CaasClient.ClusterAdminApi.ClustersGet(clientCtx, spaceID)
+		clusters, _, err := p.CaasClient.ClusterAdminApi.V1ClustersGet(clientCtx, spaceID)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster list %w", err)
 		}
 
-		for i := range clusters {
-			if clusters[i].Id == rs.Primary.ID {
-				cluster = &clusters[i]
+		for i := range clusters.Items {
+			if clusters.Items[i].Id == rs.Primary.ID {
+				cluster = &clusters.Items[i]
 			}
 		}
 

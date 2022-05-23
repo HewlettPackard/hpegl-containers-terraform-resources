@@ -46,7 +46,7 @@ func dataSourceApplianceReadContext(ctx context.Context, d *schema.ResourceData,
 
 	spaceID := d.Get("space_id").(string)
 
-	appliances, resp, err := c.CaasClient.SiteApi.AppliancesGet(clientCtx, spaceID)
+	appliances, resp, err := c.CaasClient.SiteApi.V1AppliancesGet(clientCtx, spaceID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -54,9 +54,9 @@ func dataSourceApplianceReadContext(ctx context.Context, d *schema.ResourceData,
 
 	var appliance *mcaasapi.Appliance
 
-	for b := range appliances {
-		if appliances[b].Name == d.Get("name") {
-			appliance = &appliances[b]
+	for b := range appliances.Items {
+		if appliances.Items[b].Name == d.Get("name") {
+			appliance = &appliances.Items[b]
 			d.SetId(appliance.Id)
 		}
 	}

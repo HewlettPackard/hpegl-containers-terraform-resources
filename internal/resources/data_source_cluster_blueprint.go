@@ -46,7 +46,7 @@ func dataSourceClusterBlueprintReadContext(ctx context.Context, d *schema.Resour
 
 	spaceID := d.Get("space_id").(string)
 
-	blueprints, resp, err := c.CaasClient.ClusterAdminApi.ClusterblueprintsGet(clientCtx, spaceID)
+	blueprints, resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsGet(clientCtx, spaceID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -54,9 +54,9 @@ func dataSourceClusterBlueprintReadContext(ctx context.Context, d *schema.Resour
 
 	var blueprint *mcaasapi.ClusterBlueprint
 
-	for b := range blueprints {
-		if blueprints[b].Name == d.Get("name") {
-			blueprint = &blueprints[b]
+	for b := range blueprints.Items {
+		if blueprints.Items[b].Name == d.Get("name") {
+			blueprint = &blueprints.Items[b]
 			d.SetId(blueprint.Id)
 		}
 	}

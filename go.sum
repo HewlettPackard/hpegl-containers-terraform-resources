@@ -66,6 +66,8 @@ github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.1 h1:q6azvo1b/9dL8ZNZUS4P
 github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.1/go.mod h1:rHDxAIj4FrgUc6JksOM0llQhGUpV732wsi19vKwyXSc=
 github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.2 h1:LC9JF9SZ5IsWOCLG9dhfCPQs4/4yyqARHgBX8pA/4jI=
 github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.2/go.mod h1:rHDxAIj4FrgUc6JksOM0llQhGUpV732wsi19vKwyXSc=
+github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.5 h1:W+7em+d7hLueBA7hGKkNAbv0bxojblRXgv5iCMu2C90=
+github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.5/go.mod h1:rHDxAIj4FrgUc6JksOM0llQhGUpV732wsi19vKwyXSc=
 github.com/Masterminds/goutils v1.1.0 h1:zukEsf/1JZwCMgHiK3GZftabmxiCw4apj3a28RPBiVg=
 github.com/Masterminds/goutils v1.1.0/go.mod h1:8cTjp+g8YejhMuvIA5y2vz3BpJxksy863GQaJW2MFNU=
 github.com/Masterminds/semver v1.4.2/go.mod h1:MB6lktGJrhw8PrUyiEoblNEGEQ+RzHPF078ddwwvV3Y=
