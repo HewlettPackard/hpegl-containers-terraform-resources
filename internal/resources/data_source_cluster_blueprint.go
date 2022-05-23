@@ -44,7 +44,7 @@ func dataSourceClusterBlueprintReadContext(ctx context.Context, d *schema.Resour
 
 	var diags diag.Diagnostics
 
-	spaceID := d.Get("space_id").(string)
+	spaceID := d.Get("site_id").(string)
 
 	blueprints, resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsGet(clientCtx, spaceID)
 	if err != nil {

@@ -6,7 +6,7 @@ import (
 
 func ClusterBlueprint() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
-		"space_id": {
+		"site_id": {
 			Type:     schema.TypeString,
 			Required: true,
 		},
