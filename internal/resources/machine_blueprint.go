@@ -127,6 +127,8 @@ func writeMachineBlueprintResourceValues(d *schema.ResourceData, machineBlueprin
 		return err
 	}
 
+	sizeDetail := schemas.FlattenSizeDetailMachineBlueprint(machineBlueprint.SizeDetail)
+
 	if err = d.Set("created_date", string(createdDate)); err != nil {
 		return err
 	}
@@ -159,7 +161,7 @@ func writeMachineBlueprintResourceValues(d *schema.ResourceData, machineBlueprin
 		return err
 	}
 
-	if err = d.Set("size_detail", machineBlueprint.SizeDetail); err != nil {
+	if err = d.Set("size_detail", sizeDetail); err != nil {
 		return err
 	}
 

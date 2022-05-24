@@ -28,7 +28,7 @@ func SizeDetail() map[string]*schema.Schema {
 			ForceNew: true,
 			Computed: true,
 		},
-		"ephermal_disk": {
+		"ephemeral_disk": {
 			Type:     schema.TypeInt,
 			ForceNew: true,
 			Computed: true,
@@ -53,9 +53,29 @@ func FlattenSizeDetail(sizeDetail *mcaasapi.AllOfMachineSetDetailSizeDetail) []i
 	sizeOut["cpu"] = sizeDetail.Cpu
 	sizeOut["memory"] = sizeDetail.Memory
 	sizeOut["root_disk"] = sizeDetail.RootDisk
-	sizeOut["ephermal_disk"] = sizeDetail.EphemeralDisk
+	sizeOut["ephemeral_disk"] = sizeDetail.EphemeralDisk
 	sizeOut["persistent_disk"] = sizeDetail.PersistentDisk
 	sizesOut[0] = sizeOut
 
 	return sizesOut
 }
+
+func FlattenSizeDetailMachineBlueprint(sizeDetail *mcaasapi.AllOfMachineBlueprintSizeDetail) []interface{} {
+	if sizeDetail == nil {
+		return nil
+	}
+
+	sizesOut := make([]interface{}, 1)
+	sizeOut := make(map[string]interface{})
+
+	sizeOut["name"] = sizeDetail.Name
+	sizeOut["cpu"] = sizeDetail.Cpu
+	sizeOut["memory"] = sizeDetail.Memory
+	sizeOut["root_disk"] = sizeDetail.RootDisk
+	sizeOut["ephemeral_disk"] = sizeDetail.EphemeralDisk
+	sizeOut["persistent_disk"] = sizeDetail.PersistentDisk
+	sizesOut[0] = sizeOut
+
+	return sizesOut
+}
+

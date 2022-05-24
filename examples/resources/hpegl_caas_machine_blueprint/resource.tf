@@ -19,10 +19,15 @@ provider hpegl {
   }
 }
 
+data "hpegl_caas_site" "blr" {
+  name = "BLR"
+  space_id = "aadc51f2-8b3f-4ae0-aff2-820f7169447f"
+}
+
 resource hpegl_caas_machine_blueprint test {
 
- name = "mbp-test1"
- site_id = "3ad9c737-5bb6-430c-9772-3a6f5a7e4015"
+ name = "mbp-test4"
+ site_id = data.hpegl_caas_site.blr.id
  machine_roles = ["controlplane"]
  machine_provider = "vmaas"
  os_image = "sles-custom"
