@@ -173,22 +173,22 @@ func clusterBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, 
 	return diags
 }
 
-func getControlPlaneData(control_plane map[string]interface{}) mcaasapi.MachineSet {
-	c := control_plane["count"].(string)
+func getControlPlaneData(controlPlane map[string]interface{}) mcaasapi.MachineSet {
+	c := controlPlane["count"].(string)
 	count, _ := strconv.ParseFloat(c, 64)
 	cp := mcaasapi.MachineSet{
-		Name:               control_plane["name"].(string),
-		MachineBlueprintId: control_plane["machine_blueprint_id"].(string),
+		Name:               controlPlane["name"].(string),
+		MachineBlueprintId: controlPlane["machine_blueprint_id"].(string),
 		Count:              count,
 	}
 	return cp
 }
 
-func getWorkerNodeData(workernode map[string]interface{}) mcaasapi.MachineSet {
+func getWorkerNodeData(workerNode map[string]interface{}) mcaasapi.MachineSet {
 	wn := mcaasapi.MachineSet{
-		MachineBlueprintId: workernode["machine_blueprint_id"].(string),
-		Count:              workernode["count"].(float64),
-		Name:               workernode["name"].(string),
+		MachineBlueprintId: workerNode["machine_blueprint_id"].(string),
+		Count:              workerNode["count"].(float64),
+		Name:               workerNode["name"].(string),
 	}
 	return wn
 }
