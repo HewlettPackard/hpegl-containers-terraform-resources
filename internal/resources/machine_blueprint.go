@@ -47,32 +47,30 @@ func machineBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 
 	var diags diag.Diagnostics
 
-
 	machineRoles := d.Get("machine_roles")
 	machineRolesInt := machineRoles.([]interface{})
 
 	var machineRolesStr []string
 
-	for _,val := range machineRolesInt {
+	for _, val := range machineRolesInt {
 		valStr := fmt.Sprint(val)
-		machineRolesStr = append(machineRolesStr,valStr)
+		machineRolesStr = append(machineRolesStr, valStr)
 	}
 
 	createMachineBlueprint := mcaasapi.MachineBlueprint{
 
-		Name: d.Get("name").(string),
-		ApplianceID: d.Get("site_id").(string),
-		MachineRoles: machineRolesStr,
-		MachineProvider: d.Get("machine_provider").(string),
-		OsImage: d.Get("os_image").(string),
-		OsVersion: d.Get("os_version").(string),
+		Name:                d.Get("name").(string),
+		ApplianceID:         d.Get("site_id").(string),
+		MachineRoles:        machineRolesStr,
+		MachineProvider:     d.Get("machine_provider").(string),
+		OsImage:             d.Get("os_image").(string),
+		OsVersion:           d.Get("os_version").(string),
 		ComputeInstanceType: d.Get("compute_type").(string),
-		Size: d.Get("size").(string),
+		Size:                d.Get("size").(string),
 		StorageInstanceType: d.Get("storage_type").(string),
-
 	}
 
-	machineBlueprint, resp, err := c.CaasClient.ClusterAdminApi.V1MachineblueprintsPost(clientCtx,createMachineBlueprint)
+	machineBlueprint, resp, err := c.CaasClient.ClusterAdminApi.V1MachineblueprintsPost(clientCtx, createMachineBlueprint)
 	if err != nil {
 		errMessage := utils.GetErrorMessage(err, resp.StatusCode)
 		diags = append(diags, diag.Errorf("Error in MachineBlueprintsPost: %s - %s", err, errMessage)...)
@@ -177,7 +175,6 @@ func writeMachineBlueprintResourceValues(d *schema.ResourceData, machineBlueprin
 		return err
 	}
 
-
 	return err
 }
 
@@ -208,4 +205,3 @@ func machineBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, 
 	return diags
 
 }
-

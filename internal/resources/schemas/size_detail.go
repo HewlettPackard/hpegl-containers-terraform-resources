@@ -78,4 +78,3 @@ func FlattenSizeDetailMachineBlueprint(sizeDetail *mcaasapi.AllOfMachineBlueprin
 
 	return sizesOut
 }
-

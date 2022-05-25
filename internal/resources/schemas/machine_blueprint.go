@@ -74,4 +74,3 @@ func MachineBlueprint() map[string]*schema.Schema {
 		},
 	}
 }
-
