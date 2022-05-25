@@ -11,12 +11,12 @@ func MachineSets() map[string]*schema.Schema {
 		"name": {
 			Type:     schema.TypeString,
 			ForceNew: true,
-			Required: true,
+			Computed: true,
 		},
 		"machine_blueprint_id": {
 			Type:     schema.TypeString,
 			ForceNew: true,
-			Required: true,
+			Computed: true,
 		},
 		"os_image": {
 			Type:     schema.TypeString,
@@ -31,7 +31,7 @@ func MachineSets() map[string]*schema.Schema {
 		"count": {
 			Type:     schema.TypeFloat,
 			ForceNew: true,
-			Required: true,
+			Computed: true,
 		},
 	}
 }

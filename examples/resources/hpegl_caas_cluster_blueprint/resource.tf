@@ -25,13 +25,12 @@ data "hpegl_caas_site" "blr" {
 }
 
 resource hpegl_caas_cluster_blueprint testbp {
-  name         = "tf-clusterbp"
+  name         = "tf-cluster-bp"
   k8s_version  = ""
   default_storage_class = ""
   site_id = data.hpegl_caas_site.blr.id
   cluster_provider = ""
   control_plane = {
-    name = "master"
     machine_blueprint_id = ""
     count = ""
   }

@@ -177,7 +177,7 @@ func getControlPlaneData(controlPlane map[string]interface{}) mcaasapi.MachineSe
 	c := controlPlane["count"].(string)
 	count, _ := strconv.ParseFloat(c, 64)
 	cp := mcaasapi.MachineSet{
-		Name:               controlPlane["name"].(string),
+		Name:               "master",
 		MachineBlueprintId: controlPlane["machine_blueprint_id"].(string),
 		Count:              count,
 	}
