@@ -50,21 +50,17 @@ func clusterBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 	var machineSetsList []mcaasapi.MachineSet
 
-	controlPlaneMap := d.Get("control_plane").(map[string]interface{})
-	controlPlaneDetails := getControlPlaneData(controlPlaneMap)
+	controlPlaneMap := d.Get("control_plane_nodes").(map[string]interface{})
+	controlPlaneDetails := getControlPlaneNodeDetails(controlPlaneMap)
 	machineSetsList = append(machineSetsList, controlPlaneDetails)
 
 	workerNodesList := d.Get("worker_nodes").([]interface{})
-	workerNodes := make([]map[string]interface{}, 0, len(workerNodesList))
 	for _, workerNode := range workerNodesList {
 		worker, ok := workerNode.(map[string]interface{})
 		if ok {
-			workerNodes = append(workerNodes, worker)
+			workerNodeDetails := getWorkerNodeDetails(worker)
+			machineSetsList = append(machineSetsList, workerNodeDetails)
 		}
-	}
-	for i := range workerNodes {
-		workerNodeDetails := getWorkerNodeData(workerNodes[i])
-		machineSetsList = append(machineSetsList, workerNodeDetails)
 	}
 
 	createClusterBlueprint := mcaasapi.ClusterBlueprint{
@@ -173,18 +169,18 @@ func clusterBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, 
 	return diags
 }
 
-func getControlPlaneData(controlPlane map[string]interface{}) mcaasapi.MachineSet {
-	c := controlPlane["count"].(string)
+func getControlPlaneNodeDetails(controlPlaneNodes map[string]interface{}) mcaasapi.MachineSet {
+	c := controlPlaneNodes["count"].(string)
 	count, _ := strconv.ParseFloat(c, 64)
 	cp := mcaasapi.MachineSet{
 		Name:               "master",
-		MachineBlueprintId: controlPlane["machine_blueprint_id"].(string),
+		MachineBlueprintId: controlPlaneNodes["machine_blueprint_id"].(string),
 		Count:              count,
 	}
 	return cp
 }
 
-func getWorkerNodeData(workerNode map[string]interface{}) mcaasapi.MachineSet {
+func getWorkerNodeDetails(workerNode map[string]interface{}) mcaasapi.MachineSet {
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: workerNode["machine_blueprint_id"].(string),
 		Count:              workerNode["count"].(float64),

@@ -30,7 +30,7 @@ resource hpegl_caas_cluster_blueprint testbp {
   default_storage_class = ""
   site_id = data.hpegl_caas_site.blr.id
   cluster_provider = ""
-  control_plane = {
+  control_plane_nodes = {
     machine_blueprint_id = ""
     count = ""
   }
