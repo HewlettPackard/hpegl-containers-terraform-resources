@@ -19,17 +19,16 @@ import (
 
 const (
 	// Fill in these values based on the environment being used for acceptance testing
-	name                        = "tf-bp-test"
-	k8s_version                 = "v1.20.11.hpe-2"
-	default_storage_class       = ""
-	spaceId                     = ""
-	cluster_provider            = "ecp"
-	cp_machine_blueprint_id     = ""
-	cp_count                    = "1"
-	worker_name                 = "worker1"
-	worker_machine_blueprint_id = ""
-	worker_count                = "1"
-	site_id                     = ""
+	name                     = "tf-bp-test"
+	k8sVersion               = "v1.20.11.hpe-2"
+	defaultStorageClass      = ""
+	clusterProvider          = "ecp"
+	cpMachineBlueprintID     = ""
+	cpCount                  = "1"
+	workerName               = "worker1"
+	workerMachineBlueprintID = ""
+	workerCount              = "1"
+	siteID                   = ""
 )
 
 // nolint: gosec
@@ -60,7 +59,7 @@ func testCaasClusterBlueprint() string {
       		machine_blueprint_id = "%s"
       		count = "%s"
     	}
-	}`, spaceId, name, k8s_version, default_storage_class, cluster_provider, cp_machine_blueprint_id, cp_count, worker_name, worker_machine_blueprint_id, worker_count)
+	}`, spaceID, name, k8sVersion, defaultStorageClass, clusterProvider, cpMachineBlueprintID, cpCount, workerName, workerMachineBlueprintID, workerCount)
 }
 
 func TestCaasClusterBlueprintCreate(t *testing.T) {
@@ -124,7 +123,7 @@ func testCaasClusterBlueprintDestroy(name string) resource.TestCheckFunc {
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 
 		var clusterBlueprint *mcaasapi.ClusterBlueprint
-		clusterBlueprints, _, err := p.CaasClient.ClusterAdminApi.V1ClusterblueprintsGet(clientCtx, site_id)
+		clusterBlueprints, _, err := p.CaasClient.ClusterAdminApi.V1ClusterblueprintsGet(clientCtx, siteID)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster blueprint list %w", err)
 		}
