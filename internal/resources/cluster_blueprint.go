@@ -4,20 +4,20 @@ package resources
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"strconv"
 
 	"github.com/HewlettPackard/hpegl-containers-go-sdk/pkg/mcaasapi"
-
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/resources/schemas"
+	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/utils"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/auth"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/client"
 )
 
 func ClusterBlueprint() *schema.Resource {
 	return &schema.Resource{
-		Schema:         nil,
+		Schema:         schemas.ClusterBlueprintCreate(),
 		SchemaVersion:  0,
 		StateUpgraders: nil,
 		CreateContext:  clusterBlueprintCreateContext,
@@ -29,21 +29,61 @@ func ClusterBlueprint() *schema.Resource {
 		Importer:           nil,
 		DeprecationMessage: "",
 		Timeouts:           nil,
-		Description:        `NOTE: this resource is currently not implemented`,
+		Description: `The cluster blueprint resource facilitates the creation and
+			deletion of a CaaS cluster blueprint.  Update is currently not supported. The
+			required inputs when creating a cluster blueprint are name, k8s_version,
+			site-id, cluster_provider, control_plane, worker_nodes and default_storage_class`,
 	}
 }
 
 func clusterBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	_, err := client.GetClientFromMetaMap(meta)
+	c, err := client.GetClientFromMetaMap(meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	_, err = auth.GetToken(ctx, meta)
+	token, err := auth.GetToken(ctx, meta)
 	if err != nil {
-		return diag.Errorf("Error in getting token: %s", err)
+		return diag.Errorf("Error in getting token in cluster-blueprint-create: %s", err)
+	}
+	clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
+
+	var diags diag.Diagnostics
+	var machineSetsList []mcaasapi.MachineSet
+
+	controlPlaneMap := d.Get("control_plane_nodes").(map[string]interface{})
+	controlPlaneDetails := getControlPlaneNodeDetails(controlPlaneMap)
+	machineSetsList = append(machineSetsList, controlPlaneDetails)
+
+	workerNodesList := d.Get("worker_nodes").([]interface{})
+	for _, workerNode := range workerNodesList {
+		worker, ok := workerNode.(map[string]interface{})
+		if ok {
+			workerNodeDetails := getWorkerNodeDetails(worker)
+			machineSetsList = append(machineSetsList, workerNodeDetails)
+		}
 	}
 
-	return nil
+	createClusterBlueprint := mcaasapi.ClusterBlueprint{
+		Name:                d.Get("name").(string),
+		K8sVersion:          d.Get("k8s_version").(string),
+		DefaultStorageClass: d.Get("default_storage_class").(string),
+		ApplianceID:         d.Get("site_id").(string),
+		ClusterProvider:     d.Get("cluster_provider").(string),
+		MachineSets:         machineSetsList,
+	}
+
+	clusterBlueprint, resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsPost(clientCtx, createClusterBlueprint)
+	if err != nil {
+		errMessage := utils.GetErrorMessage(err, resp.StatusCode)
+		diags = append(diags, diag.Errorf("Error in ClustersBlueprintPost: %s - %s", err, errMessage)...)
+
+		return diags
+	}
+	defer resp.Body.Close()
+
+	d.SetId(clusterBlueprint.Id)
+
+	return clusterBlueprintReadContext(ctx, d, meta)
 }
 
 func clusterBlueprintReadContext(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -105,14 +145,46 @@ func writeBlueprintResourceValues(d *schema.ResourceData, blueprint *mcaasapi.Cl
 }
 
 func clusterBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	_, err := client.GetClientFromMetaMap(meta)
+	c, err := client.GetClientFromMetaMap(meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	_, err = auth.GetToken(ctx, meta)
+	token, err := auth.GetToken(ctx, meta)
 	if err != nil {
 		return diag.Errorf("Error in getting token: %s", err)
 	}
+	clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 
-	return nil
+	var diags diag.Diagnostics
+	id := d.Id()
+
+	resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsIdDelete(clientCtx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer resp.Body.Close()
+
+	d.SetId("")
+
+	return diags
+}
+
+func getControlPlaneNodeDetails(controlPlaneNodes map[string]interface{}) mcaasapi.MachineSet {
+	c := controlPlaneNodes["count"].(string)
+	count, _ := strconv.ParseFloat(c, 64)
+	cp := mcaasapi.MachineSet{
+		Name:               "master",
+		MachineBlueprintId: controlPlaneNodes["machine_blueprint_id"].(string),
+		Count:              count,
+	}
+	return cp
+}
+
+func getWorkerNodeDetails(workerNode map[string]interface{}) mcaasapi.MachineSet {
+	wn := mcaasapi.MachineSet{
+		MachineBlueprintId: workerNode["machine_blueprint_id"].(string),
+		Count:              workerNode["count"].(float64),
+		Name:               workerNode["name"].(string),
+	}
+	return wn
 }

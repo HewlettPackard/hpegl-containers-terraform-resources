@@ -52,6 +52,7 @@ func Cluster() *schema.Resource {
 		StateUpgraders: nil,
 		CreateContext:  clusterCreateContext,
 		ReadContext:    clusterReadContext,
+		UpdateContext:  clusterUpdateContext,
 		// TODO figure out if a cluster can be updated
 		// Update:             clusterUpdate,
 		DeleteContext: clusterDeleteContext,
@@ -165,6 +166,15 @@ func clusterReadContext(ctx context.Context, d *schema.ResourceData, meta interf
 	defer resp.Body.Close()
 
 	if err = writeClusterResourceValues(d, &cluster); err != nil {
+		return diag.FromErr(err)
+	}
+
+	kubeconfig, _, err := c.CaasClient.ClusterAdminApi.V1ClustersIdKubeconfigGet(clientCtx, id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err = d.Set("kubeconfig", kubeconfig.Kubeconfig); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -400,4 +410,9 @@ func isErrRetryable(err error) bool {
 	}
 
 	return false
+}
+
+func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	return diags
 }
