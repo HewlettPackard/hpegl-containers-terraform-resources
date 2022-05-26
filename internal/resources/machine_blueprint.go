@@ -23,13 +23,16 @@ func MachineBlueprint() *schema.Resource {
 		CreateContext:  machineBlueprintCreateContext,
 		ReadContext:    machineBlueprintReadContext,
 		// TODO figure out if and how a blueprint can be updated
-		// Update:             clusterBlueprintUpdate,
+		// Update:             machineBlueprintUpdate,
 		DeleteContext:      machineBlueprintDeleteContext,
 		CustomizeDiff:      nil,
 		Importer:           nil,
 		DeprecationMessage: "",
 		Timeouts:           nil,
-		Description:        `NOTE: this resource is currently not implemented`,
+		Description: `The machine blueprint resource facilitates the creation and
+			deletion of a CaaS machine blueprint.  Update is currently not supported. The
+			required inputs when creating a cluster blueprint are name,
+			site-id, machine_provider, machine_roles, os_image, os_version, compute_type, size and storage_type`,
 	}
 }
 
