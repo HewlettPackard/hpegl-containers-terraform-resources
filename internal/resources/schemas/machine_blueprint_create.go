@@ -4,7 +4,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func MachineBlueprint() map[string]*schema.Schema {
+func MachineBlueprintCreate() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"created_date": {
 			Type:     schema.TypeString,
@@ -22,7 +22,7 @@ func MachineBlueprint() map[string]*schema.Schema {
 		"machine_provider": {
 			Type:     schema.TypeString,
 			ForceNew: true,
-			Computed: true,
+			Required: true,
 		},
 		"machine_roles": {
 			Type: schema.TypeList,
@@ -30,22 +30,22 @@ func MachineBlueprint() map[string]*schema.Schema {
 				Type: schema.TypeString,
 			},
 			ForceNew: true,
-			Computed: true,
+			Required: true,
 		},
 		"os_image": {
 			Type:     schema.TypeString,
 			ForceNew: true,
-			Computed: true,
+			Required: true,
 		},
 		"os_version": {
 			Type:     schema.TypeString,
 			ForceNew: true,
-			Computed: true,
+			Required: true,
 		},
 		"size": {
 			Type:     schema.TypeString,
 			ForceNew: true,
-			Computed: true,
+			Required: true,
 		},
 		"size_detail": {
 			Type: schema.TypeList,
@@ -58,12 +58,12 @@ func MachineBlueprint() map[string]*schema.Schema {
 		"compute_type": {
 			Type:     schema.TypeString,
 			ForceNew: true,
-			Computed: true,
+			Required: true,
 		},
 		"storage_type": {
 			Type:     schema.TypeString,
 			ForceNew: true,
-			Computed: true,
+			Required: true,
 		},
 		"site_id": {
 			Type:     schema.TypeString,

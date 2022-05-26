@@ -21,19 +21,19 @@ provider hpegl {
 
 data "hpegl_caas_site" "blr" {
   name = "BLR"
-  space_id = "aadc51f2-8b3f-4ae0-aff2-820f7169447f"
+  space_id = ""
 }
 
 resource hpegl_caas_machine_blueprint test {
 
- name = "mbp-test4"
+ name = ""
  site_id = data.hpegl_caas_site.blr.id
  machine_roles = ["controlplane"]
  machine_provider = "vmaas"
  os_image = "sles-custom"
- os_version = "15"
- compute_type = "General Purpose"
- size = "Large"
- storage_type = "General Purpose"
+ os_version = ""
+ compute_type = ""
+ size = ""
+ storage_type = ""
 
 }

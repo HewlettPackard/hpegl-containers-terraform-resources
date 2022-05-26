@@ -17,7 +17,7 @@ import (
 
 func MachineBlueprint() *schema.Resource {
 	return &schema.Resource{
-		Schema:         schemas.MachineBlueprint(),
+		Schema:         schemas.MachineBlueprintCreate(),
 		SchemaVersion:  0,
 		StateUpgraders: nil,
 		CreateContext:  machineBlueprintCreateContext,
