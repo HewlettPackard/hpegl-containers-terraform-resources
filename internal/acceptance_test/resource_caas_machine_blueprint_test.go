@@ -17,14 +17,14 @@ import (
 
 const (
 	// Fill in these values based on the environment being used for acceptance testing
-	nameMbp                     = "mbp-test"
-	siteIDMbp                   = ""
-	machineProvider             = "vmaas"
-	osImage                     = "sles-custom"
-	osVersion                   = ""
-	computeType                 = ""
-	size                        = ""
-	storageType                 = ""
+	nameMbp         = "mbp-test"
+	siteIDMbp       = ""
+	machineProvider = "vmaas"
+	osImage         = "sles-custom"
+	osVersion       = ""
+	computeType     = ""
+	size            = ""
+	storageType     = ""
 )
 
 var machineRoles = []string{"controlplane"}
