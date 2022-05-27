@@ -45,13 +45,13 @@ func testCaasMachineBlueprint() string {
 	resource hpegl_caas_machine_blueprint test {
 		name         = "%s"
   		site_id = data.hpegl_caas_site.blr.id
-  		machine_roles = ["%s"]
-		machine_provider = %s
-        os_image = %s
-        os_version = %s
-        compute_type = %s
-        size = %s
-        storage_type = %s
+  		machine_roles = "%v"
+		machine_provider = "%s"
+        os_image = "%s"
+        os_version = "%s"
+        compute_type = "%s"
+        size = "%s"
+        storage_type = "%s"
 	}`, spaceID, nameMbp, machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType)
 }
 
