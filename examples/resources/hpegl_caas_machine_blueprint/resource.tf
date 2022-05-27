@@ -25,7 +25,6 @@ data "hpegl_caas_site" "blr" {
 }
 
 resource hpegl_caas_machine_blueprint test {
-
  name = ""
  site_id = data.hpegl_caas_site.blr.id
  machine_roles = ["controlplane"]
@@ -35,5 +34,4 @@ resource hpegl_caas_machine_blueprint test {
  compute_type = ""
  size = ""
  storage_type = ""
-
 }
