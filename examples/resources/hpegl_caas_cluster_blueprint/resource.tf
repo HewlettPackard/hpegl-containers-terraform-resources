@@ -21,7 +21,7 @@ provider hpegl {
 
 data "hpegl_caas_site" "blr" {
   name = "BLR"
-  space_id = "aadc51f2-8b3f-4ae0-aff2-820f7169447f"
+  space_id = ""
 }
 
 data "hpegl_caas_machine_blueprint" "mbcontrolplane" {
@@ -42,16 +42,21 @@ data "hpegl_caas_cluster_provider" "clusterprovider" {
 resource hpegl_caas_cluster_blueprint testbp {
   name         = "tf-cluster-bp"
   k8s_version  = data.hpegl_caas_cluster_provider.clusterprovider.k8s_versions[0]
-  default_storage_class = "gl-sbc-glhcnimblestor"
+  default_storage_class = ""
   site_id = data.hpegl_caas_site.blr.id
-  cluster_provider = "ecp"
+  cluster_provider = ""
   control_plane_nodes = {
     machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbcontrolplane.id
-    count = "1"
+    count = ""
   }
   worker_nodes {
-      name = "worker-1"
-      machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbcontrolplane.id
-      count = "1"
+      name = ""
+      machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
+      count = ""
     }
+  worker_nodes {
+        name = ""
+        machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
+        count = ""
+      }
 }

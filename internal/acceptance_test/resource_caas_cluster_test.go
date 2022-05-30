@@ -38,12 +38,16 @@ func testCaasCluster() string {
 		name = "BLR"
 		space_id = "%s"
 	  }
+	data "hpegl_caas_cluster_blueprint" "bp" {
+		name = "demo"
+		site_id = data.hpegl_caas_site.blr.id
+	}
 	resource hpegl_caas_cluster test {
 		name         = "%s%d"
-		blueprint_id = "%s"
+		blueprint_id = data.hpegl_caas_cluster_blueprint.bp.id
         site_id = data.hpegl_caas_site.blr.id
 		space_id     = "%s"
-	}`, spaceID, clusterName, r.Int63n(99999999), blueprintID, spaceID)
+	}`, spaceID, clusterName, r.Int63n(99999999), spaceID)
 }
 
 func TestCaasCreate(t *testing.T) {

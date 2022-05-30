@@ -15,18 +15,18 @@ terraform {
 
 provider hpegl {
   caas {
-    api_url = "https://mcaas.intg.hpedevops.net/mcaas/v1"
+    api_url = "https://mcaas.intg.hpedevops.net/mcaas"
   }
-}
-
-data "hpegl_caas_cluster_blueprint" "bp" {
-  name = "demo"
-  space_id = ""
 }
 
 data "hpegl_caas_site" "blr" {
   name = "BLR"
   space_id = ""
+}
+
+data "hpegl_caas_cluster_blueprint" "bp" {
+  name = "demo"
+  site_id = data.hpegl_caas_site.blr.id
 }
 
 resource hpegl_caas_cluster test {
