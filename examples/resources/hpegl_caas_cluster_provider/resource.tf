@@ -21,7 +21,7 @@ provider hpegl {
 
 data "hpegl_caas_site" "blr" {
   name = "BLR"
-  space_id = "aadc51f2-8b3f-4ae0-aff2-820f7169447f"
+  space_id = ""
 }
 
 data "hpegl_caas_cluster_provider" "clusterprovider" {

@@ -68,7 +68,7 @@ func FlattenStorageClasses(storageClass *[]mcaasapi.StorageClass) []interface{} 
 		sclasses["iops"] = sc.Iops
 		sclasses["encryption"] = sc.Encryption
 		sclasses["dedupe"] = sc.Dedupe
-		sclasses["cost_per_GB"] = sc.CostPerGB
+		sclasses["cost_per_gb"] = sc.CostPerGB
 		storageClasses[i] = sclasses
 	}
 
