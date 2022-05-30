@@ -78,3 +78,42 @@ func FlattenSizeDetailMachineBlueprint(sizeDetail *mcaasapi.AllOfMachineBlueprin
 
 	return sizesOut
 }
+
+func FlattenClusterProviderMinMasterSize(sizeDetail *mcaasapi.AllOfClusterProviderMinMasterSize) []interface{} {
+	if sizeDetail == nil {
+		return nil
+	}
+
+	sizesOut := make([]interface{}, 1)
+	sizeOut := make(map[string]interface{})
+
+	sizeOut["name"] = sizeDetail.Name
+	sizeOut["cpu"] = sizeDetail.Cpu
+	sizeOut["memory"] = sizeDetail.Memory
+	sizeOut["root_disk"] = sizeDetail.RootDisk
+	sizeOut["ephemeral_disk"] = sizeDetail.EphemeralDisk
+	sizeOut["persistent_disk"] = sizeDetail.PersistentDisk
+	sizesOut[0] = sizeOut
+
+	return sizesOut
+}
+
+
+func FlattenClusterProviderMinWorkerSize(sizeDetail *mcaasapi.AllOfClusterProviderMinWorkerSize) []interface{} {
+	if sizeDetail == nil {
+		return nil
+	}
+
+	sizesOut := make([]interface{}, 1)
+	sizeOut := make(map[string]interface{})
+
+	sizeOut["name"] = sizeDetail.Name
+	sizeOut["cpu"] = sizeDetail.Cpu
+	sizeOut["memory"] = sizeDetail.Memory
+	sizeOut["root_disk"] = sizeDetail.RootDisk
+	sizeOut["ephemeral_disk"] = sizeDetail.EphemeralDisk
+	sizeOut["persistent_disk"] = sizeDetail.PersistentDisk
+	sizesOut[0] = sizeOut
+
+	return sizesOut
+}

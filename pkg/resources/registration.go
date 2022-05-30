@@ -27,6 +27,7 @@ func (r Registration) SupportedDataSources() map[string]*schema.Resource {
 		"hpegl_caas_site":              resources.DataSourceAppliance(),
 		"hpegl_caas_machine_blueprint": resources.DataSourceMachineBlueprint(),
 		"hpegl_caas_cluster":           resources.DataSourceCluster(),
+		"hpegl_caas_cluster_provider":  resources.DataSourceClusterProvider(),
 	}
 }
 
