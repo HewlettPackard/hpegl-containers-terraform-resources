@@ -13,13 +13,11 @@ func LicenseInfo() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			ForceNew: true,
 			Computed: true,
-
 		},
 		"summary": {
 			Type:     schema.TypeString,
 			ForceNew: true,
 			Computed: true,
-
 		},
 		"status": {
 			Type:     schema.TypeString,
@@ -33,7 +31,7 @@ func FlattenLicenseInfo(licenseInfo *mcaasapi.ClusterProviderLicenseInfo) []inte
 	if licenseInfo == nil {
 		return nil
 	}
-    lic := licenseInfo.Licenses
+	lic := licenseInfo.Licenses
 	licenses := make([]interface{}, len(lic))
 	for i, lf := range lic {
 		licinfo := make(map[string]interface{})

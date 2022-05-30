@@ -30,22 +30,22 @@ func StorageClasses() map[string]*schema.Schema {
 			Computed: true,
 		},
 		"iops": {
-			Type: schema.TypeString,
+			Type:     schema.TypeString,
 			ForceNew: true,
 			Computed: true,
 		},
 		"encryption": {
-			Type: schema.TypeString,
+			Type:     schema.TypeString,
 			ForceNew: true,
 			Computed: true,
 		},
 		"dedupe": {
-			Type: schema.TypeString,
+			Type:     schema.TypeString,
 			ForceNew: true,
 			Computed: true,
 		},
 		"cost_per_gb": {
-			Type: schema.TypeString,
+			Type:     schema.TypeString,
 			ForceNew: true,
 			Computed: true,
 		},

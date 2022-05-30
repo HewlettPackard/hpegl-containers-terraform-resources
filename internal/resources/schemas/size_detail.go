@@ -98,7 +98,6 @@ func FlattenClusterProviderMinMasterSize(sizeDetail *mcaasapi.AllOfClusterProvid
 	return sizesOut
 }
 
-
 func FlattenClusterProviderMinWorkerSize(sizeDetail *mcaasapi.AllOfClusterProviderMinWorkerSize) []interface{} {
 	if sizeDetail == nil {
 		return nil

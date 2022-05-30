@@ -115,7 +115,7 @@ func writeClusterProviderValues(d *schema.ResourceData, clusterProvider *mcaasap
 
 	minMasterSize := schemas.FlattenClusterProviderMinMasterSize(clusterProvider.MinMasterSize)
 	if err = d.Set("min_master_size", minMasterSize); err != nil {
-	return err
+		return err
 	}
 
 	minWorkerSize := schemas.FlattenClusterProviderMinWorkerSize(clusterProvider.MinWorkerSize)
