@@ -46,12 +46,12 @@ resource hpegl_caas_cluster_blueprint testbp {
   }
   worker_nodes {
       name = ""
-      machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbcontrolplane.id
+      machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
       count = ""
     }
   worker_nodes {
         name = ""
-        machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbcontrolplane.id
+        machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
         count = ""
       }
 }

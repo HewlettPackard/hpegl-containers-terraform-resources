@@ -64,6 +64,8 @@ github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3
 github.com/Djarvur/go-err113 v0.0.0-20210108212216-aea10b59be24/go.mod h1:4UJr5HIiMZrwgkSPdsjy2uOQExX/WEILpIrO9UPGuXs=
 github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.5 h1:W+7em+d7hLueBA7hGKkNAbv0bxojblRXgv5iCMu2C90=
 github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.5/go.mod h1:rHDxAIj4FrgUc6JksOM0llQhGUpV732wsi19vKwyXSc=
+github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.8 h1:UKeGSMIY+S3nYc2R7uZznYb2b6p7nT85xy4Q1ZgRDcM=
+github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.8/go.mod h1:rHDxAIj4FrgUc6JksOM0llQhGUpV732wsi19vKwyXSc=
 github.com/Masterminds/goutils v1.1.0 h1:zukEsf/1JZwCMgHiK3GZftabmxiCw4apj3a28RPBiVg=
 github.com/Masterminds/goutils v1.1.0/go.mod h1:8cTjp+g8YejhMuvIA5y2vz3BpJxksy863GQaJW2MFNU=
 github.com/Masterminds/semver v1.4.2/go.mod h1:MB6lktGJrhw8PrUyiEoblNEGEQ+RzHPF078ddwwvV3Y=
