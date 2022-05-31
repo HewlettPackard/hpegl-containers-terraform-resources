@@ -30,6 +30,6 @@ data "hpegl_caas_cluster_provider" "clusterprovider" {
 }
 
 output "cluster_provider" {
-  description = "Storage classes information"
+  description = "The cluster provider response"
   value       = data.hpegl_caas_cluster_provider.clusterprovider.*
 }

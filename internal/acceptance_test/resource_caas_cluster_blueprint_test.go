@@ -20,13 +20,10 @@ import (
 const (
 	// Fill in these values based on the environment being used for acceptance testing
 	name                     = "tf-bp-test"
-	k8sVersion               = "v1.20.11.hpe-2"
 	defaultStorageClass      = ""
 	clusterProvider          = "ecp"
-	cpMachineBlueprintID     = ""
 	cpCount                  = "1"
 	workerName               = "worker1"
-	workerMachineBlueprintID = ""
 	workerCount              = "1"
 	siteID                   = ""
 )
@@ -43,23 +40,39 @@ func testCaasClusterBlueprint() string {
 	data "hpegl_caas_site" "blr" {
 		name = "BLR"
 		space_id = "%s"
+	}
+    
+    data "hpegl_caas_machine_blueprint" "mbcontrolplane" {
+  		name = "standard-master"
+  		site_id = data.hpegl_caas_site.blr.id
+	}
+
+	data "hpegl_caas_machine_blueprint" "mbworker" {
+  		name = "standard-worker"
+  		site_id = data.hpegl_caas_site.blr.id
+	}
+
+    data "hpegl_caas_cluster_provider" "clusterprovider" {
+		name = "ecp"
+		site_id = data.hpegl_site.blr.id
 	  }
+
 	resource hpegl_caas_cluster test {
 		name         = "%s"
-  		k8s_version  = "%s"
+  		k8s_version  = data.hpegl_caas_cluster_provider.clusterprovider.ecp.k8s_versions[0]
   		default_storage_class = "%s"
   		site_id = data.hpegl_caas_site.blr.id
   		cluster_provider = "%s"
 		control_plane_nodes = {
-    		machine_blueprint_id = "%s"
+    		machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbcontrolplane.id
 			count = "%s"
   		}
   		worker_nodes {
 			name = "%s"
-      		machine_blueprint_id = "%s"
+      		machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
       		count = "%s"
     	}
-	}`, spaceID, name, k8sVersion, defaultStorageClass, clusterProvider, cpMachineBlueprintID, cpCount, workerName, workerMachineBlueprintID, workerCount)
+	}`, spaceID, name, defaultStorageClass, clusterProvider, cpCount, workerName, workerCount)
 }
 
 func TestCaasClusterBlueprintCreate(t *testing.T) {
