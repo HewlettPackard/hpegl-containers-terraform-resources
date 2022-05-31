@@ -19,13 +19,13 @@ import (
 
 const (
 	// Fill in these values based on the environment being used for acceptance testing
-	name                     = "tf-bp-test"
-	defaultStorageClass      = ""
-	clusterProvider          = "ecp"
-	cpCount                  = "1"
-	workerName               = "worker1"
-	workerCount              = "1"
-	siteID                   = ""
+	name                = "tf-bp-test"
+	defaultStorageClass = ""
+	clusterProvider     = "ecp"
+	cpCount             = "1"
+	workerName          = "worker1"
+	workerCount         = "1"
+	siteID              = ""
 )
 
 // nolint: gosec
