@@ -54,7 +54,7 @@ func testCaasClusterBlueprint() string {
 
     data "hpegl_caas_cluster_provider" "clusterprovider" {
 		name = "ecp"
-		site_id = data.hpegl_site.blr.id
+		site_id = data.hpegl_caas_site.blr.id
 	  }
 
 	resource hpegl_caas_cluster test {
