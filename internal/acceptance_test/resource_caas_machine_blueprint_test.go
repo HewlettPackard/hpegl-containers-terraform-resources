@@ -3,6 +3,7 @@ package acceptancetest
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"testing"
 	"time"
 
@@ -17,7 +18,7 @@ import (
 
 const (
 	// Fill in these values based on the environment being used for acceptance testing
-	nameMbp         = "test-machine-bp1"
+	nameMbp         = "test-machine-bp"
 	machineProvider = "vmaas"
 	osImage         = "sles-custom"
 	osVersion       = "15"
@@ -31,7 +32,7 @@ var machineRoles = []string{"controlplane"}
 
 // nolint: gosec
 func testCaasMachineBlueprint() string {
-
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return fmt.Sprintf(`
 	provider hpegl {
 		caas {
@@ -43,7 +44,7 @@ func testCaasMachineBlueprint() string {
 		space_id = "%s"
 	  }
 	resource hpegl_caas_machine_blueprint testmb {
-		name         = "%s"
+		name         = "%s%d"
   		site_id = data.hpegl_caas_site.blr.id
   		machine_roles = %q
 		machine_provider = "%s"
@@ -52,7 +53,7 @@ func testCaasMachineBlueprint() string {
 		compute_type = "%s"
 		size = "%s"
 		storage_type = "%s"
-	}`, spaceIDMbp, nameMbp, machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType)
+	}`, spaceIDMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType)
 }
 
 func TestCaasMachineBlueprintCreate(t *testing.T) {

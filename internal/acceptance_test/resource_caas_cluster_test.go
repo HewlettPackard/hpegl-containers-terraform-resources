@@ -19,9 +19,8 @@ import (
 )
 
 const (
-	clusterName = "iac-acc-"
-	blueprintID = "3f31daa9-9777-4c06-a4d0-e49215f5e48c"
-	spaceID     = "f866c9bd-2d2c-4e60-aab0-64737df96273"
+	clusterName = "test"
+	spaceIDCBp  = "8d5dfbc0-f996-4e45-ab34-e719588a96ca"
 )
 
 // nolint: gosec
@@ -31,23 +30,23 @@ func testCaasCluster() string {
 	return fmt.Sprintf(`
 	provider hpegl {
 		caas {
-			api_url = "https://client.greenlake.hpe.com/api/caas/mcaas/v1"
+			api_url = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 		}
 	}
-	data "hpegl_caas_site" "blr" {
-		name = "BLR"
+	data "hpegl_caas_site" "site" {
+		name = "Austin"
 		space_id = "%s"
 	  }
 	data "hpegl_caas_cluster_blueprint" "bp" {
 		name = "demo"
-		site_id = data.hpegl_caas_site.blr.id
+		site_id = data.hpegl_caas_site.site.id
 	}
-	resource hpegl_caas_cluster test {
+	resource hpegl_caas_cluster testcluster {
 		name         = "%s%d"
 		blueprint_id = data.hpegl_caas_cluster_blueprint.bp.id
-        site_id = data.hpegl_caas_site.blr.id
+        site_id = data.hpegl_caas_site.site.id
 		space_id     = "%s"
-	}`, spaceID, clusterName, r.Int63n(99999999), spaceID)
+	}`, spaceIDCBp, clusterName, r.Int63n(99999999), spaceIDCBp)
 }
 
 func TestCaasCreate(t *testing.T) {
@@ -58,11 +57,11 @@ func TestCaasCreate(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: resource.ComposeTestCheckFunc(testCaasClusterDestroy("hpegl_caas_cluster.test")),
+		CheckDestroy: resource.ComposeTestCheckFunc(testCaasClusterDestroy("hpegl_caas_cluster.testcluster")),
 		Steps: []resource.TestStep{
 			{
 				Config: testCaasCluster(),
-				Check:  resource.ComposeTestCheckFunc(checkCaasCluster("hpegl_caas_cluster.test")),
+				Check:  resource.ComposeTestCheckFunc(checkCaasCluster("hpegl_caas_cluster.testcluster")),
 			},
 		},
 	})
@@ -100,9 +99,9 @@ func checkCaasCluster(name string) resource.TestCheckFunc {
 
 func testCaasClusterDestroy(name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources["hpegl_caas_cluster.test"]
+		rs, ok := s.RootModule().Resources["hpegl_caas_cluster.testcluster"]
 		if !ok {
-			return fmt.Errorf("Resource not found: %s", "hpegl_caas_cluster.test")
+			return fmt.Errorf("Resource not found: %s", "hpegl_caas_cluster.testcluster")
 		}
 
 		spaceID := rs.Primary.Attributes["space_id"]

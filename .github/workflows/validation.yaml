@@ -10,9 +10,21 @@ jobs:
         go: [ '1.17' ]
     name: Validation Tests
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - name: Checkout workspace
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
-      - run: go install github.com/nomad-software/vend@v1.0.3
-      - run: make validate
+
+      - name: Install packages
+        run: go install github.com/nomad-software/vend@v1.0.3
+
+      - name: Run acceptance tests
+        env:
+          HPEGL_TENANT_ID: brfa5n9pl45lv8l76pl0
+          HPEGL_USER_ID: 0oaitjo1o6a01xWVx357
+          HPEGL_USER_SECRET: qj5jQ-dGbypSvhflXKWKxKZ51T2cV-0LkmO4YeIm
+          HPEGL_IAM_SERVICE_URL: https://iam.us1.greenlake-hpe.com/oauth2/brfa5n9pl45lv8l76pl0/ausana9x32OAhrsZn357
+        run: make acceptance-short

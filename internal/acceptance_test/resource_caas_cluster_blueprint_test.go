@@ -5,6 +5,7 @@ package acceptancetest
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"testing"
 	"time"
 
@@ -19,7 +20,7 @@ import (
 
 const (
 	// Fill in these values based on the environment being used for acceptance testing
-	name                = "test-cluster-bp1"
+	name                = "test-cluster-bp"
 	defaultStorageClass = "gl-sbc-glhcnimblestor"
 	clusterProvider     = "ecp"
 	cpCount             = "1"
@@ -31,6 +32,7 @@ const (
 
 // nolint: gosec
 func testCaasClusterBlueprint() string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	return fmt.Sprintf(`
 	provider hpegl {
@@ -54,7 +56,7 @@ func testCaasClusterBlueprint() string {
 	}
 
 	resource hpegl_caas_cluster_blueprint testcb {
-		name         = "%s"
+		name         = "%s%d"
 		k8s_version  = "%s"
   		default_storage_class = "%s"
   		site_id = data.hpegl_caas_site.site.id
@@ -68,7 +70,7 @@ func testCaasClusterBlueprint() string {
       		machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
       		count = "%s"
     	}
-	}`, cbspaceID, name, k8sVersion, defaultStorageClass, clusterProvider, cpCount, workerName, workerCount)
+	}`, cbspaceID, name, r.Int63n(99999999), k8sVersion, defaultStorageClass, clusterProvider, cpCount, workerName, workerCount)
 }
 
 func TestCaasClusterBlueprintCreate(t *testing.T) {
