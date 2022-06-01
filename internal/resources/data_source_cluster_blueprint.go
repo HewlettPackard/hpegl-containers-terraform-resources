@@ -44,9 +44,9 @@ func dataSourceClusterBlueprintReadContext(ctx context.Context, d *schema.Resour
 
 	var diags diag.Diagnostics
 
-	spaceID := d.Get("site_id").(string)
+	siteID := d.Get("site_id").(string)
 
-	blueprints, resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsGet(clientCtx, spaceID)
+	blueprints, resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsGet(clientCtx, siteID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -62,7 +62,7 @@ func dataSourceClusterBlueprintReadContext(ctx context.Context, d *schema.Resour
 	}
 
 	if blueprint == nil {
-		return diag.Errorf("Cluster blueprint '%s' not found in space '%s'", d.Get("name"), spaceID)
+		return diag.Errorf("Cluster blueprint '%s' not found in site '%s'", d.Get("name"), siteID)
 	}
 
 	if err = writeBlueprintResourceValues(d, blueprint); err != nil {
