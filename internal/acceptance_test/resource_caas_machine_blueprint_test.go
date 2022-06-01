@@ -17,7 +17,7 @@ import (
 
 const (
 	// Fill in these values based on the environment being used for acceptance testing
-	nameMbp         = "test-machine-bp"
+	nameMbp         = "test-machine-bp1"
 	machineProvider = "vmaas"
 	osImage         = "sles-custom"
 	osVersion       = "15"
@@ -45,7 +45,7 @@ func testCaasMachineBlueprint() string {
 	resource hpegl_caas_machine_blueprint testmb {
 		name         = "%s"
   		site_id = data.hpegl_caas_site.blr.id
-  		machine_roles = "%v"
+  		machine_roles = %q
 		machine_provider = "%s"
 		os_image = "%s"
 		os_version = "%s"
