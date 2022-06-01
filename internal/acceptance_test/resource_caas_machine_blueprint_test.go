@@ -18,7 +18,6 @@ import (
 const (
 	// Fill in these values based on the environment being used for acceptance testing
 	nameMbp         = "test-machine-bp"
-	siteIDMbp       = "ecb6b8a4-3303-4528-96d1-42230336a9ec"
 	machineProvider = "vmaas"
 	osImage         = "sles-custom"
 	osVersion       = "15"
@@ -102,6 +101,8 @@ func testCaasMachineBlueprintDestroy(name string) resource.TestCheckFunc {
 			return fmt.Errorf("Resource not found: %s", "hpegl_caas_machine_blueprint.testmb")
 		}
 
+		siteID := rs.Primary.Attributes["site_id"]
+
 		p, err := client.GetClientFromMetaMap(testAccProvider.Meta())
 		if err != nil {
 			return err
@@ -117,7 +118,7 @@ func testCaasMachineBlueprintDestroy(name string) resource.TestCheckFunc {
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 
 		var machineBlueprint *mcaasapi.MachineBlueprint
-		machineBlueprints, _, err := p.CaasClient.ClusterAdminApi.V1MachineblueprintsGet(clientCtx, siteIDMbp)
+		machineBlueprints, _, err := p.CaasClient.ClusterAdminApi.V1MachineblueprintsGet(clientCtx, siteID)
 		if err != nil {
 			return fmt.Errorf("Error in getting machine blueprint list %w", err)
 		}

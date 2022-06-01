@@ -25,7 +25,6 @@ const (
 	cpCount             = "1"
 	workerName          = "worker1"
 	workerCount         = "1"
-	siteID              = "ecb6b8a4-3303-4528-96d1-42230336a9ec"
 	cbspaceID           = "8d5dfbc0-f996-4e45-ab34-e719588a96ca"
 	k8sVersion          = "v1.20.11.hpe-2"
 )
@@ -117,6 +116,8 @@ func testCaasClusterBlueprintDestroy(name string) resource.TestCheckFunc {
 		if !ok {
 			return fmt.Errorf("Resource not found: %s", "hpegl_caas_cluster_blueprint.testcb")
 		}
+
+		siteID := rs.Primary.Attributes["site_id"]
 
 		p, err := client.GetClientFromMetaMap(testAccProvider.Meta())
 		if err != nil {
