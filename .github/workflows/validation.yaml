@@ -23,8 +23,8 @@ jobs:
 
       - name: Run acceptance tests
         env:
-          HPEGL_TENANT_ID: brfa5n9pl45lv8l76pl0
-          HPEGL_USER_ID: 0oaitjo1o6a01xWVx357
-          HPEGL_USER_SECRET: qj5jQ-dGbypSvhflXKWKxKZ51T2cV-0LkmO4YeIm
-          HPEGL_IAM_SERVICE_URL: https://iam.us1.greenlake-hpe.com/oauth2/brfa5n9pl45lv8l76pl0/ausana9x32OAhrsZn357
+          HPEGL_TENANT_ID:  ${{ secrets.HPEGL_TENANT_ID }}
+          HPEGL_USER_ID: ${{ secrets.HPEGL_USER_ID }}
+          HPEGL_USER_SECRET: ${{ secrets.HPEGL_USER_SECRET }}
+          HPEGL_IAM_SERVICE_URL: ${{ secrets.HPEGL_IAM_SERVICE_URL }}
         run: make acceptance-short
