@@ -28,6 +28,8 @@ const (
 	workerCount         = "1"
 	cbspaceID           = "8d5dfbc0-f996-4e45-ab34-e719588a96ca"
 	k8sVersion          = "v1.20.11.hpe-2"
+	apiURLCbp           = "https://mcaas.us1.greenlake-hpe.com/mcaas"
+	siteNameCBp         = "Austin"
 )
 
 // nolint: gosec
@@ -37,11 +39,11 @@ func testCaasClusterBlueprint() string {
 	return fmt.Sprintf(`
 	provider hpegl {
 		caas {
-			api_url = "https://mcaas.us1.greenlake-hpe.com/mcaas"
+			api_url = "%s"
 		}
 	}
 	data "hpegl_caas_site" "site" {
-		name = "Austin"
+		name = "%s"
 		space_id = "%s"
 	}
     
@@ -70,7 +72,7 @@ func testCaasClusterBlueprint() string {
       		machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
       		count = "%s"
     	}
-	}`, cbspaceID, name, r.Int63n(99999999), k8sVersion, defaultStorageClass, clusterProvider, cpCount, workerName, workerCount)
+	}`, apiURLCbp, siteNameCBp, cbspaceID, name, r.Int63n(99999999), k8sVersion, defaultStorageClass, clusterProvider, cpCount, workerName, workerCount)
 }
 
 func TestCaasClusterBlueprintCreate(t *testing.T) {

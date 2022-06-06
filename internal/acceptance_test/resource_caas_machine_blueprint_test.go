@@ -26,6 +26,8 @@ const (
 	size            = "Large"
 	storageType     = "General Purpose"
 	spaceIDMbp      = "8d5dfbc0-f996-4e45-ab34-e719588a96ca"
+	apiURLMBp       = "https://mcaas.us1.greenlake-hpe.com/mcaas"
+	siteNameMbp     = "Austin"
 )
 
 var machineRoles = []string{"controlplane"}
@@ -36,11 +38,11 @@ func testCaasMachineBlueprint() string {
 	return fmt.Sprintf(`
 	provider hpegl {
 		caas {
-			api_url = "https://mcaas.us1.greenlake-hpe.com/mcaas"
+			api_url = "%s"
 		}
 	}
 	data "hpegl_caas_site" "blr" {
-		name = "Austin"
+		name = "%s"
 		space_id = "%s"
 	  }
 	resource hpegl_caas_machine_blueprint testmb {
@@ -53,7 +55,7 @@ func testCaasMachineBlueprint() string {
 		compute_type = "%s"
 		size = "%s"
 		storage_type = "%s"
-	}`, spaceIDMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType)
+	}`, apiURLMBp, siteNameMbp, spaceIDMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType)
 }
 
 func TestCaasMachineBlueprintCreate(t *testing.T) {
