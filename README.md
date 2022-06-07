@@ -301,30 +301,31 @@ $ terraform init
 
 Note: Ensure there is no .terraform.lock.hcl or .terraform in examples/cluster-create before running terraform init. If this file/folder is present, manually delete it beform initializing the terraform. 
 
-Update examples/cluster-create/main.tf with values for
+Update examples/resources/hpegl_caas_cluster/resource.tf with values for
 
 ```bash
-blueprint_id =<blueprint id>
-site_id =<site id>
-space_id     =<space id>
+cluster name
+cluster blueprint name
+site name
+space id
 ```
 To create the terraform plan:
 
 ```bash
-terraform plan  --var cluster_name=<cluster name>
+terraform plan
 ```
 
 To apply the plan and create a cluster:
 
 ```bash
-terraform apply --var cluster_name=<cluster name>
+terraform apply
 ```
 Note: The timeout for cluster creation is set to 60 mins.
 
 To delete the cluster:
 
 ```bash
-terraform destroy --var cluster_name=<cluster name>
+terraform destroy
 ```
 
 
