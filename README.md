@@ -295,7 +295,7 @@ export HPEGL_IAM_SERVICE_URL=<the "issuer" URL for the service client >
 To initialize the terraform:
 
 ```bash
-$ cd examples/cluster-create
+$ cd examples/resources/hpegl_caas_cluster
 $ terraform init
 ```
 
