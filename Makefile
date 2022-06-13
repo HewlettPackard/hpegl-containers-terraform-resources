@@ -91,6 +91,7 @@ acceptance-short:
 	TF_ACC=true go test -v -timeout=120s -short -cover ./... 2>&1 | tee result.txt;
 	@if grep "FAIL" result.txt  ; then\
 		echo "Tests Failed";\
+		rm -r result.txt;\
 		exit 1;\
 	fi
 	@echo "Tests Passed";
