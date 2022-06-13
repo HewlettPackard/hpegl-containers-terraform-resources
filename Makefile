@@ -88,8 +88,8 @@ acceptance:
 acceptance-short:
 	TF_ACC_CONFIG_PATH=$(shell pwd)	\
 	TF_ACC_CONFIG=prod \
-	TF_ACC=true go test -v -timeout=120s -short -cover ./...
-
+	TF_ACC=true go test -v -timeout=120s -short -cover ./... | grep "exit status 1" | (echo "Tests failed"; exit 1)
+	@echo "Tests Passed"
 build: vendor $(NAME)
 .PHONY: build
 
