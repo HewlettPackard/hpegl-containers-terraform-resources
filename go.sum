@@ -62,8 +62,6 @@ github.com/BurntSushi/toml v0.4.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbi
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/Djarvur/go-err113 v0.0.0-20210108212216-aea10b59be24/go.mod h1:4UJr5HIiMZrwgkSPdsjy2uOQExX/WEILpIrO9UPGuXs=
-github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.8 h1:UKeGSMIY+S3nYc2R7uZznYb2b6p7nT85xy4Q1ZgRDcM=
-github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.8/go.mod h1:rHDxAIj4FrgUc6JksOM0llQhGUpV732wsi19vKwyXSc=
 github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.9 h1:n2lfLOciFRjFNy2Xxsmg/HwBWCg6mEW62rP8glGr7ns=
 github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.9/go.mod h1:rHDxAIj4FrgUc6JksOM0llQhGUpV732wsi19vKwyXSc=
 github.com/Masterminds/goutils v1.1.0/go.mod h1:8cTjp+g8YejhMuvIA5y2vz3BpJxksy863GQaJW2MFNU=
@@ -474,8 +472,8 @@ github.com/hashicorp/terraform-exec v0.16.1/go.mod h1:aj0lVshy8l+MHhFNoijNHtqTJQ
 github.com/hashicorp/terraform-json v0.13.0/go.mod h1:y5OdLBCT+rxbwnpxZs9kGL7R9ExU76+cpdY8zHwoazk=
 github.com/hashicorp/terraform-json v0.14.0 h1:sh9iZ1Y8IFJLx+xQiKHGud6/TSUCM0N8e17dKDpqV7s=
 github.com/hashicorp/terraform-json v0.14.0/go.mod h1:5A9HIWPkk4e5aeeXIBbkcOvaZbIYnAIkEyqP2pNSckM=
-github.com/hashicorp/terraform-plugin-docs v0.9.0 h1:CEu7NToNWRR2os6DfT/Du2s+8qzXHyIcZQ10oiMdbJs=
-github.com/hashicorp/terraform-plugin-docs v0.9.0/go.mod h1:47ZcsxMUJxAjGzHf+dZ9q78oYf4PeJxO1N+i5XDtXBc=
+github.com/hashicorp/terraform-plugin-docs v0.10.0 h1:LwoFJ3RoKElDFhBRomsDkaEn59OUNXa92M21VCuL7Vk=
+github.com/hashicorp/terraform-plugin-docs v0.10.0/go.mod h1:47ZcsxMUJxAjGzHf+dZ9q78oYf4PeJxO1N+i5XDtXBc=
 github.com/hashicorp/terraform-plugin-go v0.4.0/go.mod h1:7u/6nt6vaiwcWE2GuJKbJwNlDFnf5n95xKw4hqIVr58=
 github.com/hashicorp/terraform-plugin-go v0.9.1 h1:vXdHaQ6aqL+OF076nMSBV+JKPdmXlzG5mzVDD04WyPs=
 github.com/hashicorp/terraform-plugin-go v0.9.1/go.mod h1:ItjVSlQs70otlzcCwlPcU8FRXLdO973oYFRZwAOxy8M=
