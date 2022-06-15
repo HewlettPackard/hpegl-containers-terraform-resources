@@ -111,7 +111,7 @@ func testCaasMachineBlueprintDestroy(name string) resource.TestCheckFunc {
 			return err
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 		defer cancel()
 
 		token, err := auth.GetToken(ctx, testAccProvider.Meta())
