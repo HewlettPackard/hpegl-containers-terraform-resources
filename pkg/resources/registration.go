@@ -45,7 +45,7 @@ func (r Registration) ProviderSchemaEntry() *schema.Resource {
 			constants.APIURL: {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("HPEGL_CAAS_API_URL", ""),
+				DefaultFunc: schema.EnvDefaultFunc("HPEGL_CAAS_API_URL", "https://mcaas.us1.greenlake-hpe.com/mcaas"),
 				Description: "The URL to use for the CaaS API, can also be set with the HPEGL_CAAS_API_URL env var",
 			},
 		},
