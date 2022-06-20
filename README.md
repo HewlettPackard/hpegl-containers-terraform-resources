@@ -51,6 +51,7 @@ The repo follows golang standards:
 ├── golangci-lint-config.yaml
 ├── go.mod
 ├── go.sum
+├── integ.yaml
 ├── internal
 │   ├── acceptance_test
 │   ├── resources
