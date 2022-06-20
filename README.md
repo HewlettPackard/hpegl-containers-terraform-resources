@@ -15,7 +15,6 @@
         + [Using the service-specific provider](#using-the-service-specific-provider)
         + [IAM token generation](#iam-token-generation)
             - [API-vended Service Client](#api-vended-service-client)
-            - [HPE Service Client](#hpe-service-client)
     * [To Build and Test the Terraform Provider](#to-build-and-test-the-terraform-provider)
 
 ## Introduction
@@ -95,17 +94,10 @@ There are two basic types of [terraform test](https://www.terraform.io/docs/exte
   These tests are the primary method of ensuring that Terraform providers work as advertised. 
   Acceptance tests need to be developed for each service that is added to the GreenLake provider.
   Acceptance tests can be run from this service provider repo using the plugin.ProviderFunc object
-  returned from test-utils. Moreover the intention is that we will be able to copy acceptance tests
-  verbatim (or with minimal changes to test set-up) from the service repos to hpegl.  See
-  [here](https://github.com/hpe-hcss/terraform-provider-hpegl/tree/main/internal/acceptance/bmaas)
-  for acceptance tests for bmaas/Quake.  Note that these bmaas acceptance tests require a working Quake
-  portal to run against.  Also note that these bmaas acceptance tests were copied from the standalone
-  Quake provider repo. <br><br>
+  returned from test-utils.<br><br>
   Some information on writing acceptance tests can be found
   [here](https://www.terraform.io/docs/extend/testing/acceptance-tests/testcase.html)
 
-  This repo implements the acceptance framework. More info on this framework can be found [here](https://github.com/hpe-hcss/terraform-provider-hpegl/blob/main/developer/HPEGL_developer_details.md#acceptance-test-framework)
-  
 An example of how to use test-utils.ProviderFunc() to populate a test provider map required by acceptance
 tests is contained in provider_test.go
 
