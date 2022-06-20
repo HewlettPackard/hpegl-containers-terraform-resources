@@ -27,4 +27,5 @@ jobs:
           HPEGL_USER_ID: ${{ secrets.HPEGL_USER_ID }}
           HPEGL_USER_SECRET: ${{ secrets.HPEGL_USER_SECRET }}
           HPEGL_IAM_SERVICE_URL: ${{ secrets.HPEGL_IAM_SERVICE_URL }}
+          TF_VAR_HPEGL_SPACE: ${{ secrets.TF_VAR_HPEGL_SPACE }}
         run: make acceptance-short

@@ -20,7 +20,6 @@ import (
 
 const (
 	clusterName = "test"
-	spaceIDCBp  = "8d5dfbc0-f996-4e45-ab34-e719588a96ca"
 	apiURL      = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 	siteName    = "Austin"
 )
@@ -35,9 +34,12 @@ func testCaasCluster() string {
 			api_url = "%s"
 		}
 	}
+	variable "HPEGL_SPACE" {
+  		type = string
+	}
 	data "hpegl_caas_site" "site" {
 		name = "%s"
-		space_id = "%s"
+		space_id = var.HPEGL_SPACE
 	  }
 	data "hpegl_caas_cluster_blueprint" "bp" {
 		name = "demo"
@@ -47,8 +49,8 @@ func testCaasCluster() string {
 		name         = "%s%d"
 		blueprint_id = data.hpegl_caas_cluster_blueprint.bp.id
         site_id = data.hpegl_caas_site.site.id
-		space_id     = "%s"
-	}`, apiURL, siteName, spaceIDCBp, clusterName, r.Int63n(99999999), spaceIDCBp)
+		space_id     = var.HPEGL_SPACE
+	}`, apiURL, siteName, clusterName, r.Int63n(99999999))
 }
 
 func TestCaasCreate(t *testing.T) {

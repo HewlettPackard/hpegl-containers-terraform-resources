@@ -25,7 +25,6 @@ const (
 	computeType     = "General Purpose"
 	size            = "Large"
 	storageType     = "General Purpose"
-	spaceIDMbp      = "8d5dfbc0-f996-4e45-ab34-e719588a96ca"
 	apiURLMBp       = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 	siteNameMbp     = "Austin"
 )
@@ -41,9 +40,12 @@ func testCaasMachineBlueprint() string {
 			api_url = "%s"
 		}
 	}
+	variable "HPEGL_SPACE" {
+  		type = string
+	}
 	data "hpegl_caas_site" "blr" {
 		name = "%s"
-		space_id = "%s"
+		space_id = var.HPEGL_SPACE
 	  }
 	resource hpegl_caas_machine_blueprint testmb {
 		name         = "%s%d"
@@ -55,7 +57,7 @@ func testCaasMachineBlueprint() string {
 		compute_type = "%s"
 		size = "%s"
 		storage_type = "%s"
-	}`, apiURLMBp, siteNameMbp, spaceIDMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType)
+	}`, apiURLMBp, siteNameMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType)
 }
 
 func TestCaasMachineBlueprintCreate(t *testing.T) {
