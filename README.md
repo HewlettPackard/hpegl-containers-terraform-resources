@@ -1,4 +1,4 @@
-# hpegl-caas-terraform-resources
+# hpegl-containers-terraform-resources
 
 - [hpegl-containers-terraform-resources](#hpegl-containers-terraform-resources)
     * [Introduction](#introduction)
@@ -16,6 +16,7 @@
         + [IAM token generation](#iam-token-generation)
             - [API-vended Service Client](#api-vended-service-client)
     * [To Build and Test the Terraform Provider](#to-build-and-test-the-terraform-provider)
+    * [Integration with HPE/terraform-provider-hpegl](#integration-with-hpe/terraform-provider-hpegl)
 
 ## Introduction
 
@@ -270,5 +271,10 @@ To delete the cluster:
 ```bash
 terraform destroy
 ```
+
+## Integration with HPE/terraform-provider-hpegl
+
+Every release in this repository gets picked up by dependabot, which then raises a PR in HPE/terraform-provider-hpegl, as per the changes in the release. The GL Team reviews and merges the PR and goes forward with their release process. They will then handle publishing a new release of the terraform-provider-hpegl.
+
 
 
