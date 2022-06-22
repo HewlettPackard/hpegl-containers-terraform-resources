@@ -16,7 +16,7 @@
         + [IAM token generation](#iam-token-generation)
             - [API-vended Service Client](#api-vended-service-client)
     * [To Build and Test the Terraform Provider](#to-build-and-test-the-terraform-provider)
-    * [Integration with HPE terraform-provider-hpegl](#integration-with-hpe/terraform-provider-hpegl)
+    * [Integration with HPE terraform-provider-hpegl](#integration-with-hpe-terraform-provider-hpegl)
 
 ## Introduction
 
@@ -272,7 +272,7 @@ To delete the cluster:
 terraform destroy
 ```
 
-## Integration with terraform-provider-hpegl
+## Integration with HPE terraform-provider-hpegl
 
 Every release in this repository gets picked up by dependabot, which then raises a PR in [terraform-provider-hpegl](https://github.com/HPE/terraform-provider-hpegl), as per the changes in the release. The GL Team then reviews and merges the PR and goes forward with their release process. They will handle publishing a new version of the terraform-provider-hpegl. The latest version will then be available in the official Terraform [registry](https://registry.terraform.io/providers/HPE/hpegl/0.3.1).
 
