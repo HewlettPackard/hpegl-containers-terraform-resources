@@ -2,7 +2,7 @@
 
 - [hpegl-containers-terraform-resources](#hpegl-containers-terraform-resources)
     * [Introduction](#introduction)
-    * [Terraform versions](#terraform-versions)
+    * [Terraform version](#terraform-version)
     * [Terraform provider & v2.0 SDK](#terraform-provider--v20-sdk)
     * [Basic structure](#basic-structure)
     * [internal](#internal)
@@ -16,7 +16,7 @@
         + [IAM token generation](#iam-token-generation)
             - [API-vended Service Client](#api-vended-service-client)
     * [To Build and Test the Terraform Provider](#to-build-and-test-the-terraform-provider)
-    * [Integration with HPE/terraform-provider-hpegl](#integration-with-hpe/terraform-provider-hpegl)
+    * [Integration with HPE terraform-provider-hpegl](#integration-with-hpe/terraform-provider-hpegl)
 
 ## Introduction
 
@@ -82,7 +82,7 @@ The internal directory contains:
     for acceptance tests.
   
 
-### internal/acceptance_test
+### acceptance_test
 
 There are two basic types of [terraform test](https://www.terraform.io/docs/extend/testing/index.html):
 * [Unit tests](https://www.terraform.io/docs/extend/testing/unit-testing.html): <br>
@@ -110,7 +110,7 @@ To run acceptance tests:
 $ make acceptance
 ```
 
-### internal/resources
+### resources
 
 This repo contains CaaS provider code to create and destroy a CaaS cluster, along with some stub cluster-blueprint
 CRUD code.  This code is ultimately executed by the hpegl terraform provider.  Note that we are using
@@ -149,7 +149,7 @@ the meta map and to execute it.
 The bulk of service-team development will occur in this directory.  Please ensure that as resource and data-source
 terraform objects are created that they are added to pkg/resources/registration.go
 
-### internal/test-utils
+### test-utils
 
 The code in this directory should not need to be changed outside of imports.  It constructs a terraform plugin.ProviderFunc object
 that is used to create a "dummy" service-specific terraform provider called hpegl that can be used for
@@ -272,9 +272,9 @@ To delete the cluster:
 terraform destroy
 ```
 
-## Integration with HPE/terraform-provider-hpegl
+## Integration with terraform-provider-hpegl
 
-Every release in this repository gets picked up by dependabot, which then raises a PR in HPE/terraform-provider-hpegl, as per the changes in the release. The GL Team reviews and merges the PR and goes forward with their release process. They will then handle publishing a new release of the terraform-provider-hpegl.
+Every release in this repository gets picked up by dependabot, which then raises a PR in [terraform-provider-hpegl](https://github.com/HPE/terraform-provider-hpegl), as per the changes in the release. The GL Team then reviews and merges the PR and goes forward with their release process. They will handle publishing a new version of the terraform-provider-hpegl. The latest version will then be available in the official Terraform [registry](https://registry.terraform.io/providers/HPE/hpegl/0.3.1).
 
 
 
