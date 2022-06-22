@@ -274,7 +274,7 @@ terraform destroy
 
 ## Integration with HPE terraform-provider-hpegl
 
-Every release in this repository gets picked up by dependabot, which then raises a PR in [terraform-provider-hpegl](https://github.com/HPE/terraform-provider-hpegl), as per the changes in the release. The GL Team then reviews and merges the PR and goes forward with their release process. They will handle publishing a new version of the terraform-provider-hpegl. The latest version will then be available in the official Terraform [registry](https://registry.terraform.io/providers/HPE/hpegl/0.3.1).
+On every release in this repository, a PR is raised in [terraform-provider-hpegl](https://github.com/HPE/terraform-provider-hpegl) by dependabot, as per the changes in the release. The GL Team then reviews and merges the PR and goes forward with their release process. They will handle publishing a new version of the terraform-provider-hpegl. The latest version will then be available in the official Terraform [registry](https://registry.terraform.io/providers/HPE/hpegl/0.3.1).
 
 
 
