@@ -37,6 +37,13 @@ func Cluster() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
+		"default_machine_sets": {
+			Type: schema.TypeList,
+			Elem: &schema.Resource{
+				Schema: MachineSets(),
+			},
+			Computed: true,
+		},
 		"machine_sets": {
 			Type: schema.TypeList,
 			Elem: &schema.Resource{
@@ -85,6 +92,26 @@ func Cluster() map[string]*schema.Schema {
 		"kubeconfig": {
 			Type:     schema.TypeString,
 			Computed: true,
+		},
+		"worker_nodes": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"name": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"machine_blueprint_id": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"count": {
+						Type:     schema.TypeFloat,
+						Required: true,
+					},
+				},
+			},
 		},
 	}
 }

@@ -19,9 +19,11 @@ import (
 )
 
 const (
-	clusterName = "test"
-	apiURL      = "https://mcaas.us1.greenlake-hpe.com/mcaas"
-	siteName    = "Austin"
+	clusterName    = "test"
+	apiURL         = "https://mcaas.us1.greenlake-hpe.com/mcaas"
+	siteName       = "Austin"
+	testWorkerNode = "testworkernode"
+	NodeCount      = "1"
 )
 
 // nolint: gosec
@@ -53,6 +55,41 @@ func testCaasCluster() string {
 	}`, apiURL, siteName, clusterName, r.Int63n(99999999))
 }
 
+// nolint: gosec
+func testCaasClusterUpdate() string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	return fmt.Sprintf(`
+	provider hpegl {
+		caas {
+			api_url = "%s"
+		}
+	}
+	variable "HPEGL_SPACE" {
+  		type = string
+	}
+	data "hpegl_caas_site" "site" {
+		name = "%s"
+		space_id = var.HPEGL_SPACE
+	  }
+	data "hpegl_caas_cluster_blueprint" "bp" {
+		name = "demo"
+		site_id = data.hpegl_caas_site.site.id
+	}
+	resource hpegl_caas_cluster testcluster {
+		name         = "%s%d"
+		blueprint_id = data.hpegl_caas_cluster_blueprint.bp.id
+        site_id = data.hpegl_caas_site.site.id
+		space_id     = var.HPEGL_SPACE
+		
+		worker_nodes {
+			name = "%s"
+			machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
+			count = "%s"
+		  }
+	}`, apiURL, siteName, clusterName, r.Int63n(99999999), testWorkerNode, NodeCount)
+}
+
 func TestCaasCreate(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping CaaS cluster creation in short mode.")
@@ -66,6 +103,10 @@ func TestCaasCreate(t *testing.T) {
 			{
 				Config: testCaasCluster(),
 				Check:  resource.ComposeTestCheckFunc(checkCaasCluster("hpegl_caas_cluster.testcluster")),
+			},
+			{
+				Config: testCaasClusterUpdate(),
+				Check:  resource.ComposeTestCheckFunc(checkCaasClusterUpdate("hpegl_caas_cluster.testcluster")),
 			},
 		},
 	})
@@ -95,6 +136,27 @@ func checkCaasCluster(name string) resource.TestCheckFunc {
 		state := rs.Primary.Attributes["state"]
 		if state != "ready" {
 			return fmt.Errorf("Cluster not ready")
+		}
+
+		return nil
+	}
+}
+
+func checkCaasClusterUpdate(name string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("Resource not found: %s", name)
+		}
+
+		state := rs.Primary.Attributes["state"]
+		if state != "ready" {
+			return fmt.Errorf("Cluster not ready")
+		}
+
+		machineSets := rs.Primary.Attributes["machine_sets"]
+		if len(machineSets) != 3 {
+			return fmt.Errorf("Incorrect worker/master nodes, expected 3 found %v", len(machineSets))
 		}
 
 		return nil
