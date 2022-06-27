@@ -28,6 +28,7 @@ const (
 	stateDeleting     = "deleting"
 	stateReady        = "ready"
 	stateDeleted      = "deleted"
+	stateUpdating     = "updating"
 
 	stateRetrying = "retrying" // placeholder state used to allow retrying after errors
 
@@ -39,6 +40,9 @@ const (
 	// or if the cluster isn't present in the list of clusters (and we're not checking that the
 	// cluster is deleted
 	retryLimit = 3
+
+	//Default worker Node Pool Name
+	defaultWorkerName = "worker"
 )
 
 // getTokenFunc type of function that is used to get a token, for use in polling loops
@@ -53,17 +57,15 @@ func Cluster() *schema.Resource {
 		CreateContext:  clusterCreateContext,
 		ReadContext:    clusterReadContext,
 		UpdateContext:  clusterUpdateContext,
-		// TODO figure out if a cluster can be updated
-		// Update:             clusterUpdate,
-		DeleteContext: clusterDeleteContext,
-		CustomizeDiff: nil,
+		DeleteContext:  clusterDeleteContext,
+		CustomizeDiff:  nil,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: "",
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(clusterAvailableTimeout),
-			// Update: schema.DefaultTimeout(clusterAvailableTimeout),
+			Update: schema.DefaultTimeout(clusterAvailableTimeout),
 			Delete: schema.DefaultTimeout(clusterDeleteTimeout),
 		},
 		Description: `The cluster resource facilitates the creation and
@@ -120,6 +122,57 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Only set id to non-empty string if resource has been successfully created
 	d.SetId(cluster.Id)
+
+	// Set default master and worker nodes
+	defaultFlattenMachineSets := schemas.FlattenMachineSets(&cluster.MachineSets)
+	if err = d.Set("default_machine_sets", defaultFlattenMachineSets); err != nil {
+		return diag.FromErr(err)
+	}
+
+	//Add additional worker node pool after cluster creation
+	workerNodes, workerNodePresent := d.GetOk("worker_nodes")
+	if workerNodePresent {
+		workerNodesList := workerNodes.([]interface{})
+		machineSets := []mcaasapi.MachineSet{}
+
+		for _, workerNode := range workerNodesList {
+			machineSets = append(machineSets, getWorkerNodeDetails(workerNode.(map[string]interface{})))
+		}
+
+		defaultMachineSets := cluster.MachineSets
+		//Remove default worker node if its declared in worker nodes
+		if workerPresentInMachineSets(machineSets, defaultWorkerName) {
+			defaultMachineSets = removeWorkerFromMachineSets(cluster.MachineSets, defaultWorkerName)
+		}
+
+		machineSets = append(defaultMachineSets, machineSets...)
+		updateCluster := mcaasapi.UpdateCluster{
+			MachineSets: machineSets,
+		}
+
+		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
+		cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersIdPut(clientCtx, updateCluster, cluster.Id)
+		if err != nil {
+			errMessage := utils.GetErrorMessage(err, resp.StatusCode)
+			diags = append(diags, diag.Errorf("Error in V1ClustersIdPut: %s - %s", err, errMessage)...)
+			return diags
+		}
+		defer resp.Body.Close()
+
+		createStateConf := resource.StateChangeConf{
+			Delay:      0,
+			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating},
+			Target:     []string{stateReady},
+			Timeout:    clusterAvailableTimeout,
+			MinTimeout: pollingInterval,
+			Refresh:    clusterRefresh(ctx, d, cluster.Id, spaceID, stateReady, meta),
+		}
+
+		_, err = createStateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
 
 	// TODO Should we be passing clientCtx here?
 	return clusterReadContext(ctx, d, meta)
@@ -413,6 +466,97 @@ func isErrRetryable(err error) bool {
 }
 
 func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	c, err := client.GetClientFromMetaMap(meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	token, err := auth.GetToken(ctx, meta)
+	if err != nil {
+		return diag.Errorf("Error in getting token in cluster-create: %s", err)
+	}
+
+	clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 	var diags diag.Diagnostics
-	return diags
+
+	if d.HasChange("worker_nodes") {
+		machineSets := []mcaasapi.MachineSet{}
+
+		workerNodes := d.Get("worker_nodes").([]interface{})
+		for _, workerNode := range workerNodes {
+			machineSets = append(machineSets, getWorkerNodeDetails(workerNode.(map[string]interface{})))
+		}
+
+		defaultMachineSetsInterface := d.Get("default_machine_sets").([]interface{})
+		defaultMachineSets := []mcaasapi.MachineSet{}
+
+		for _, dms := range defaultMachineSetsInterface {
+			defaultMachineSet := getDefaultMachineSet(dms.(map[string]interface{}))
+			defaultMachineSets = append(defaultMachineSets, defaultMachineSet)
+		}
+
+		if workerPresentInMachineSets(machineSets, defaultWorkerName) {
+			defaultMachineSets = removeWorkerFromMachineSets(defaultMachineSets, defaultWorkerName)
+		}
+
+		machineSets = append(machineSets, defaultMachineSets...)
+
+		updateCluster := mcaasapi.UpdateCluster{
+			MachineSets: machineSets,
+		}
+		clusterID := d.Id()
+		cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersIdPut(clientCtx, updateCluster, clusterID)
+		if err != nil {
+			errMessage := utils.GetErrorMessage(err, resp.StatusCode)
+			diags = append(diags, diag.Errorf("Error in V1ClustersIdPut: %s - %s", err, errMessage)...)
+			return diags
+		}
+		defer resp.Body.Close()
+
+		spaceID := d.Get("space_id").(string)
+		createStateConf := resource.StateChangeConf{
+			Delay:      0,
+			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating},
+			Target:     []string{stateReady},
+			Timeout:    clusterAvailableTimeout,
+			MinTimeout: pollingInterval,
+			Refresh:    clusterRefresh(ctx, d, cluster.Id, spaceID, stateReady, meta),
+		}
+
+		_, err = createStateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	return clusterReadContext(ctx, d, meta)
+}
+
+func getDefaultMachineSet(defaultMachineSet map[string]interface{}) mcaasapi.MachineSet {
+	wn := mcaasapi.MachineSet{
+		MachineBlueprintId: defaultMachineSet["machine_blueprint_id"].(string),
+		Count:              defaultMachineSet["count"].(float64),
+		Name:               defaultMachineSet["name"].(string),
+		OsImage:            defaultMachineSet["os_image"].(string),
+		OsVersion:          defaultMachineSet["os_version"].(string),
+	}
+	return wn
+}
+
+func workerPresentInMachineSets(machineSets []mcaasapi.MachineSet, workername string) bool {
+	for _, ms := range machineSets {
+		if ms.Name == workername {
+			return true
+		}
+	}
+	return false
+}
+
+func removeWorkerFromMachineSets(machineSets []mcaasapi.MachineSet, workername string) []mcaasapi.MachineSet {
+	for i, ms := range machineSets {
+		if ms.Name == workername {
+			return append(machineSets[:i], machineSets[i+1:]...)
+		}
+	}
+	return machineSets
 }
