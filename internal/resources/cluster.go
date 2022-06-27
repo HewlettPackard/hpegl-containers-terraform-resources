@@ -141,8 +141,8 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 
 		defaultMachineSets := cluster.MachineSets
 		//Remove default worker node if its declared in worker nodes
-		if workerPresentInMachineSets(machineSets, defaultWorkerName) {
-			defaultMachineSets = removeWorkerFromMachineSets(cluster.MachineSets, defaultWorkerName)
+		if utils.WorkerPresentInMachineSets(machineSets, defaultWorkerName) {
+			defaultMachineSets = utils.RemoveWorkerFromMachineSets(cluster.MachineSets, defaultWorkerName)
 		}
 
 		machineSets = append(defaultMachineSets, machineSets...)
@@ -495,8 +495,8 @@ func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta inte
 			defaultMachineSets = append(defaultMachineSets, defaultMachineSet)
 		}
 
-		if workerPresentInMachineSets(machineSets, defaultWorkerName) {
-			defaultMachineSets = removeWorkerFromMachineSets(defaultMachineSets, defaultWorkerName)
+		if utils.WorkerPresentInMachineSets(machineSets, defaultWorkerName) {
+			defaultMachineSets = utils.RemoveWorkerFromMachineSets(defaultMachineSets, defaultWorkerName)
 		}
 
 		machineSets = append(machineSets, defaultMachineSets...)
@@ -541,22 +541,4 @@ func getDefaultMachineSet(defaultMachineSet map[string]interface{}) mcaasapi.Mac
 		OsVersion:          defaultMachineSet["os_version"].(string),
 	}
 	return wn
-}
-
-func workerPresentInMachineSets(machineSets []mcaasapi.MachineSet, workername string) bool {
-	for _, ms := range machineSets {
-		if ms.Name == workername {
-			return true
-		}
-	}
-	return false
-}
-
-func removeWorkerFromMachineSets(machineSets []mcaasapi.MachineSet, workername string) []mcaasapi.MachineSet {
-	for i, ms := range machineSets {
-		if ms.Name == workername {
-			return append(machineSets[:i], machineSets[i+1:]...)
-		}
-	}
-	return machineSets
 }

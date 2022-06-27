@@ -4,8 +4,9 @@ package acceptancetest
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
-	"math/rand"
 	"testing"
 	"time"
 
@@ -14,22 +15,20 @@ import (
 
 	"github.com/HewlettPackard/hpegl-containers-go-sdk/pkg/mcaasapi"
 
+	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/utils"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/auth"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/client"
 )
 
 const (
-	clusterName    = "test"
+	clusterPrefix  = "test"
 	apiURL         = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 	siteName       = "Austin"
 	testWorkerNode = "testworkernode"
-	NodeCount      = "1"
 )
 
 // nolint: gosec
-func testCaasCluster() string {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
+func testCaasCluster(clusterName string) string {
 	return fmt.Sprintf(`
 	provider hpegl {
 		caas {
@@ -39,26 +38,24 @@ func testCaasCluster() string {
 	variable "HPEGL_SPACE" {
   		type = string
 	}
-	data "hpegl_caas_site" "site" {
-		name = "%s"
-		space_id = var.HPEGL_SPACE
-	  }
-	data "hpegl_caas_cluster_blueprint" "bp" {
-		name = "demo"
-		site_id = data.hpegl_caas_site.site.id
-	}
+		data "hpegl_caas_site" "site" {
+			name = "%s"
+			space_id = var.HPEGL_SPACE
+		}
+		data "hpegl_caas_cluster_blueprint" "bp" {
+			name = "demo"
+			site_id = data.hpegl_caas_site.site.id
+		}
 	resource hpegl_caas_cluster testcluster {
-		name         = "%s%d"
+		name         = "%v"
 		blueprint_id = data.hpegl_caas_cluster_blueprint.bp.id
         site_id = data.hpegl_caas_site.site.id
 		space_id     = var.HPEGL_SPACE
-	}`, apiURL, siteName, clusterName, r.Int63n(99999999))
+	}`, apiURL, siteName, clusterName)
 }
 
 // nolint: gosec
-func testCaasClusterUpdate() string {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
+func testCaasClusterUpdate(clusterName string) string {
 	return fmt.Sprintf(`
 	provider hpegl {
 		caas {
@@ -68,16 +65,20 @@ func testCaasClusterUpdate() string {
 	variable "HPEGL_SPACE" {
   		type = string
 	}
-	data "hpegl_caas_site" "site" {
-		name = "%s"
-		space_id = var.HPEGL_SPACE
-	  }
-	data "hpegl_caas_cluster_blueprint" "bp" {
-		name = "demo"
+		data "hpegl_caas_site" "site" {
+			name = "%s"
+			space_id = var.HPEGL_SPACE
+		}
+		data "hpegl_caas_cluster_blueprint" "bp" {
+			name = "demo"
+			site_id = data.hpegl_caas_site.site.id
+		}
+		data "hpegl_caas_machine_blueprint" "mbworker" {
+			name = "standard-worker"
 		site_id = data.hpegl_caas_site.site.id
-	}
+	  }
 	resource hpegl_caas_cluster testcluster {
-		name         = "%s%d"
+		name         = "%v"
 		blueprint_id = data.hpegl_caas_cluster_blueprint.bp.id
         site_id = data.hpegl_caas_site.site.id
 		space_id     = var.HPEGL_SPACE
@@ -85,9 +86,9 @@ func testCaasClusterUpdate() string {
 		worker_nodes {
 			name = "%s"
 			machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
-			count = "%s"
+			count = "1"
 		  }
-	}`, apiURL, siteName, clusterName, r.Int63n(99999999), testWorkerNode, NodeCount)
+	}`, apiURL, siteName, clusterName, testWorkerNode)
 }
 
 func TestCaasCreate(t *testing.T) {
@@ -95,30 +96,35 @@ func TestCaasCreate(t *testing.T) {
 		t.Skip("Skipping CaaS cluster creation in short mode.")
 	}
 
+	clusterName := fmt.Sprintf("%s-%s", clusterPrefix, randomHex(5))
+
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: resource.ComposeTestCheckFunc(testCaasClusterDestroy("hpegl_caas_cluster.testcluster")),
+		PreCheck:                  func() { testAccPreCheck(t) },
+		Providers:                 testAccProviders,
+		PreventPostDestroyRefresh: true,
+		CheckDestroy:              resource.ComposeTestCheckFunc(testCaasClusterDestroy("hpegl_caas_cluster.testcluster")),
 		Steps: []resource.TestStep{
 			{
-				Config: testCaasCluster(),
+				Config: testCaasCluster(clusterName),
 				Check:  resource.ComposeTestCheckFunc(checkCaasCluster("hpegl_caas_cluster.testcluster")),
 			},
 			{
-				Config: testCaasClusterUpdate(),
-				Check:  resource.ComposeTestCheckFunc(checkCaasClusterUpdate("hpegl_caas_cluster.testcluster")),
+				Config: testCaasClusterUpdate(clusterName),
+				Check:  resource.ComposeTestCheckFunc(checkCaasCluster("hpegl_caas_cluster.testcluster"), checkCaasClusterUpdate("hpegl_caas_cluster.testcluster")),
 			},
 		},
 	})
 }
 
 func TestCaasPlan(t *testing.T) {
+	clusterName := fmt.Sprintf("%s-%s", clusterPrefix, randomHex(5))
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config:             testCaasCluster(),
+				Config:             testCaasCluster(clusterName),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 			},
@@ -149,14 +155,34 @@ func checkCaasClusterUpdate(name string) resource.TestCheckFunc {
 			return fmt.Errorf("Resource not found: %s", name)
 		}
 
-		state := rs.Primary.Attributes["state"]
-		if state != "ready" {
-			return fmt.Errorf("Cluster not ready")
+		spaceID := rs.Primary.Attributes["space_id"]
+		id := rs.Primary.Attributes["id"]
+
+		p, err := client.GetClientFromMetaMap(testAccProvider.Meta())
+		if err != nil {
+			return err
 		}
 
-		machineSets := rs.Primary.Attributes["machine_sets"]
-		if len(machineSets) != 3 {
-			return fmt.Errorf("Incorrect worker/master nodes, expected 3 found %v", len(machineSets))
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+
+		token, err := auth.GetToken(ctx, testAccProvider.Meta())
+		if err != nil {
+			return fmt.Errorf("Failed getting a token: %w", err)
+		}
+		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
+
+		cluster, _, err := p.CaasClient.ClusterAdminApi.V1ClustersIdGet(clientCtx, id, spaceID)
+		if err != nil {
+			return fmt.Errorf("Error in getting cluster list %w", err)
+		}
+
+		if len(cluster.MachineSets) != 3 {
+			return fmt.Errorf("Incorrect worker and master nodes, expected 3 found %v", len(cluster.MachineSets))
+		}
+
+		if !utils.WorkerPresentInMachineSets(cluster.MachineSets, testWorkerNode) {
+			return fmt.Errorf("Worker node pool %v not present in cluster %v", testWorkerNode, cluster.Name)
 		}
 
 		return nil
@@ -204,4 +230,10 @@ func testCaasClusterDestroy(name string) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func randomHex(n int) string {
+	bytes := make([]byte, n)
+	rand.Read(bytes)
+	return hex.EncodeToString(bytes)
 }
