@@ -29,7 +29,7 @@ func Cluster() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"k8s_version": {
+		"kubernetes_version": {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
@@ -146,7 +146,7 @@ func DataCluster() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
-		"k8s_version": {
+		"kubernetes_version": {
 			Type:     schema.TypeString,
 			Computed: true,
 		},

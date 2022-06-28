@@ -31,7 +31,7 @@ func ClusterBlueprint() *schema.Resource {
 		Timeouts:           nil,
 		Description: `The cluster blueprint resource facilitates the creation and
 			deletion of a CaaS cluster blueprint.  Update is currently not supported. The
-			required inputs when creating a cluster blueprint are name, k8s_version,
+			required inputs when creating a cluster blueprint are name, kubernetes_version,
 			site-id, cluster_provider, control_plane, worker_nodes and default_storage_class`,
 	}
 }
@@ -65,7 +65,7 @@ func clusterBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 
 	createClusterBlueprint := mcaasapi.ClusterBlueprint{
 		Name:                d.Get("name").(string),
-		K8sVersion:          d.Get("k8s_version").(string),
+		KubernetesVersion:   d.Get("kubernetes_version").(string),
 		DefaultStorageClass: d.Get("default_storage_class").(string),
 		ApplianceID:         d.Get("site_id").(string),
 		ClusterProvider:     d.Get("cluster_provider").(string),
@@ -124,7 +124,7 @@ func writeBlueprintResourceValues(d *schema.ResourceData, blueprint *mcaasapi.Cl
 		return err
 	}
 
-	if err = d.Set("k8s_version", blueprint.K8sVersion); err != nil {
+	if err = d.Set("kubernetes_version", blueprint.KubernetesVersion); err != nil {
 		return err
 	}
 

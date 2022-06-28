@@ -11,7 +11,7 @@ func ClusterBlueprintCreate() map[string]*schema.Schema {
 			ForceNew: true,
 			Required: true,
 		},
-		"k8s_version": {
+		"kubernetes_version": {
 			Type:     schema.TypeString,
 			ForceNew: true,
 			Required: true,

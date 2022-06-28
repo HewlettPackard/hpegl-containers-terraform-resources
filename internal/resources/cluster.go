@@ -271,7 +271,7 @@ func writeClusterResourceValues(d *schema.ResourceData, cluster *mcaasapi.Cluste
 		return err
 	}
 
-	if err = d.Set("k8s_version", cluster.K8sVersion); err != nil {
+	if err = d.Set("kubernetes_version", cluster.KubernetesVersion); err != nil {
 		return err
 	}
 

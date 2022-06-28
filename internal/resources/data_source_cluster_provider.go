@@ -133,7 +133,7 @@ func writeClusterProviderValues(d *schema.ResourceData, clusterProvider *mcaasap
 		return err
 	}
 
-	if err = d.Set("k8s_versions", clusterProvider.K8sVersions); err != nil {
+	if err = d.Set("kubernetes_version", clusterProvider.KubernetesVersions); err != nil {
 		return err
 	}
 	return err

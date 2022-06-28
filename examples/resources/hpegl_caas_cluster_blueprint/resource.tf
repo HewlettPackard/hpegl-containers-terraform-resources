@@ -41,7 +41,7 @@ data "hpegl_caas_cluster_provider" "clusterprovider" {
 
 resource hpegl_caas_cluster_blueprint testbp {
   name         = "tf-cluster-bp"
-  k8s_version  = data.hpegl_caas_cluster_provider.clusterprovider.k8s_versions[0]
+  kubernetes_version  = data.hpegl_caas_cluster_provider.clusterprovider.kubernetes_version[0]
   default_storage_class = ""
   site_id = data.hpegl_caas_site.blr.id
   cluster_provider = ""

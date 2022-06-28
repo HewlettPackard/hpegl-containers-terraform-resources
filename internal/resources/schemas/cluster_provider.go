@@ -43,7 +43,7 @@ func ClusterProvider() map[string]*schema.Schema {
 			ForceNew: true,
 			Computed: true,
 		},
-		"k8s_versions": {
+		"kubernetes_versions": {
 			Type: schema.TypeList,
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
