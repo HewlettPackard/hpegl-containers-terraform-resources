@@ -78,9 +78,10 @@ func testCaasClusterBlueprint() string {
 func TestCaasClusterBlueprintCreate(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: resource.ComposeTestCheckFunc(testCaasClusterBlueprintDestroy("hpegl_caas_cluster_blueprint.testcb")),
+		PreCheck:                  func() { testAccPreCheck(t) },
+		Providers:                 testAccProviders,
+		PreventPostDestroyRefresh: true,
+		CheckDestroy:              resource.ComposeTestCheckFunc(testCaasClusterBlueprintDestroy("hpegl_caas_cluster_blueprint.testcb")),
 		Steps: []resource.TestStep{
 			{
 				Config: testCaasClusterBlueprint(),
