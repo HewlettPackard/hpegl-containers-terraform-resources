@@ -63,9 +63,10 @@ func testCaasMachineBlueprint() string {
 func TestCaasMachineBlueprintCreate(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: resource.ComposeTestCheckFunc(testCaasMachineBlueprintDestroy("hpegl_caas_machine_blueprint.testmb")),
+		PreCheck:                  func() { testAccPreCheck(t) },
+		Providers:                 testAccProviders,
+		PreventPostDestroyRefresh: true,
+		CheckDestroy:              resource.ComposeTestCheckFunc(testCaasMachineBlueprintDestroy("hpegl_caas_machine_blueprint.testmb")),
 		Steps: []resource.TestStep{
 			{
 				Config: testCaasMachineBlueprint(),
