@@ -68,10 +68,10 @@ func Cluster() *schema.Resource {
 			Update: schema.DefaultTimeout(clusterAvailableTimeout),
 			Delete: schema.DefaultTimeout(clusterDeleteTimeout),
 		},
-		Description: `The cluster resource facilitates the creation and
-			deletion of a CaaS cluster.  Update is currently not supported.  There
-			are four required inputs when creating a cluster - name, blueprint-id,
-			site-id and space-id`,
+		Description: `The cluster resource facilitates the creation, updation and
+			deletion of a CaaS cluster. There are four required inputs when 
+			creating a cluster - name, blueprint_id, site_id and space_id. 
+			worker_nodes is an optional input to scale nodes on cluster.`,
 	}
 }
 
