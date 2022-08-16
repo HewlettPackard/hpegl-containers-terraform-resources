@@ -1,4 +1,4 @@
-package test_utils
+package utils
 
 import "github.com/HewlettPackard/hpegl-containers-go-sdk/pkg/mcaasapi"
 
