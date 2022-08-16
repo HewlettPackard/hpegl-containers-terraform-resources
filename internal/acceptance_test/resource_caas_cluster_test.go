@@ -15,7 +15,7 @@ import (
 
 	"github.com/HewlettPackard/hpegl-containers-go-sdk/pkg/mcaasapi"
 
-	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/utils"
+	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/test_utils"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/auth"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/client"
 )
@@ -181,7 +181,7 @@ func checkCaasClusterUpdate(name string) resource.TestCheckFunc {
 			return fmt.Errorf("Incorrect worker and master nodes, expected 3 found %v", len(cluster.MachineSets))
 		}
 
-		if !utils.WorkerPresentInMachineSets(cluster.MachineSets, testWorkerNode) {
+		if !test_utils.WorkerPresentInMachineSets(cluster.MachineSets, testWorkerNode) {
 			return fmt.Errorf("Worker node pool %v not present in cluster %v", testWorkerNode, cluster.Name)
 		}
 
