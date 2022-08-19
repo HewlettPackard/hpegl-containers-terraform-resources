@@ -16,9 +16,9 @@ import (
 	"github.com/HewlettPackard/hpegl-containers-go-sdk/pkg/mcaasapi"
 
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/resources/schemas"
-	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/utils"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/auth"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/client"
+	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/utils"
 )
 
 const (
