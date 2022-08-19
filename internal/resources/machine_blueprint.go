@@ -3,7 +3,7 @@ package resources
 import (
 	"context"
 	"fmt"
-	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/utils"
+	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
