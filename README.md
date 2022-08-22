@@ -55,8 +55,6 @@ The repo follows golang standards:
 ├── internal
 │   ├── acceptance_test
 │   ├── resources
-│   └── test-utils
-│   └── utils
 ├── main.go
 ├── Makefile
 ├── pkg
@@ -64,6 +62,8 @@ The repo follows golang standards:
 │   ├── client
 │   ├── constants
 │   └── resources
+│   └── test-utils
+│   └── utils
 ├── prod.yaml
 ├── README.md
 ├── templates
