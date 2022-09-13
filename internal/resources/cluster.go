@@ -110,7 +110,7 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		Delay:      0,
 		Pending:    []string{stateInitializing, stateProvisioning, stateCreating, stateRetrying},
 		Target:     []string{stateReady},
-		Timeout:    clusterAvailableTimeout,
+		Timeout:    d.Timeout("create"),
 		MinTimeout: pollingInterval,
 		Refresh:    clusterRefresh(ctx, d, cluster.Id, spaceID, stateReady, meta),
 	}
@@ -163,7 +163,7 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 			Delay:      0,
 			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating},
 			Target:     []string{stateReady},
-			Timeout:    clusterAvailableTimeout,
+			Timeout:    d.Timeout("create"),
 			MinTimeout: pollingInterval,
 			Refresh:    clusterRefresh(ctx, d, cluster.Id, spaceID, stateReady, meta),
 		}
@@ -346,7 +346,7 @@ func clusterDeleteContext(ctx context.Context, d *schema.ResourceData, meta inte
 		Delay:      pollingInterval,
 		Pending:    []string{stateDeleting, stateRetrying},
 		Target:     []string{stateDeleted},
-		Timeout:    clusterDeleteTimeout,
+		Timeout:    d.Timeout("delete"),
 		MinTimeout: pollingInterval,
 		Refresh:    clusterRefresh(ctx, d, id, spaceID, stateDeleted, meta),
 	}
@@ -518,7 +518,7 @@ func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta inte
 			Delay:      0,
 			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating},
 			Target:     []string{stateReady},
-			Timeout:    clusterAvailableTimeout,
+			Timeout:    d.Timeout("create"),
 			MinTimeout: pollingInterval,
 			Refresh:    clusterRefresh(ctx, d, cluster.Id, spaceID, stateReady, meta),
 		}
