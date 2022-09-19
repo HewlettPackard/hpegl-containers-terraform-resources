@@ -162,7 +162,7 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 
 		createStateConf := resource.StateChangeConf{
 			Delay:      0,
-			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating},
+			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating, stateDeProvisioning},
 			Target:     []string{stateReady},
 			Timeout:    d.Timeout("create"),
 			MinTimeout: pollingInterval,
