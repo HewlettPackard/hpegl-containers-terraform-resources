@@ -1,4 +1,4 @@
-// (C) Copyright 2020-2021 Hewlett Packard Enterprise Development LP
+// (C) Copyright 2020-2022 Hewlett Packard Enterprise Development LP
 
 package resources
 
@@ -22,13 +22,14 @@ import (
 )
 
 const (
-	stateInitializing = "initializing"
-	stateProvisioning = "infra-provisioning"
-	stateCreating     = "creating"
-	stateDeleting     = "deleting"
-	stateReady        = "ready"
-	stateDeleted      = "deleted"
-	stateUpdating     = "updating"
+	stateInitializing   = "initializing"
+	stateProvisioning   = "infra-provisioning"
+	stateDeProvisioning = "infra-deprovisioning"
+	stateCreating       = "creating"
+	stateDeleting       = "deleting"
+	stateReady          = "ready"
+	stateDeleted        = "deleted"
+	stateUpdating       = "updating"
 
 	stateRetrying = "retrying" // placeholder state used to allow retrying after errors
 
@@ -516,7 +517,7 @@ func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		spaceID := d.Get("space_id").(string)
 		createStateConf := resource.StateChangeConf{
 			Delay:      0,
-			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating},
+			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating, stateDeProvisioning},
 			Target:     []string{stateReady},
 			Timeout:    d.Timeout("create"),
 			MinTimeout: pollingInterval,
