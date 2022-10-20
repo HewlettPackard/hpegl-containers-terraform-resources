@@ -171,8 +171,8 @@ func checkCaasClusterUpdate(name string) resource.TestCheckFunc {
 			return fmt.Errorf("Failed getting a token: %w", err)
 		}
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
-        field := "spaceID eq " + spaceID
-		cluster, _, err := p.CaasClient.ClusterAdminApi.V1ClustersIdGet(clientCtx, id,field, nil)
+		field := "spaceID eq " + spaceID
+		cluster, _, err := p.CaasClient.ClusterAdminApi.V1ClustersIdGet(clientCtx, id, field, nil)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster list %w", err)
 		}

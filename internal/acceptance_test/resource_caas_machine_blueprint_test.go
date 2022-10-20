@@ -29,7 +29,7 @@ const (
 	siteNameMbp     = "Austin"
 )
 
-var machineRoles = []string{"controlplane"}
+var machineRoles = []string{"worker"}
 
 // nolint: gosec
 func testCaasMachineBlueprint() string {

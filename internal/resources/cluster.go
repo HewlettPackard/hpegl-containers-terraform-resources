@@ -212,7 +212,7 @@ func clusterReadContext(ctx context.Context, d *schema.ResourceData, meta interf
 	var diags diag.Diagnostics
 	id := d.Id()
 	spaceID := d.Get("space_id").(string)
-    field := "spaceID eq " + spaceID
+	field := "spaceID eq " + spaceID
 	cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersIdGet(clientCtx, id, field, nil)
 	if err != nil {
 		return diag.FromErr(err)
@@ -386,7 +386,7 @@ func createGetTokenFunc(
 			return "", err
 		}
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
-        field := "spaceID eq " + spaceID
+		field := "spaceID eq " + spaceID
 		clusters, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersGet(clientCtx, field, nil)
 		if err != nil {
 			if resp != nil {
