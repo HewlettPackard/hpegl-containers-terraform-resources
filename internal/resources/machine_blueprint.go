@@ -101,8 +101,8 @@ func machineBlueprintReadContext(ctx context.Context, d *schema.ResourceData, me
 	var diags diag.Diagnostics
 	id := d.Id()
 	applianceID := d.Get("site_id").(string)
-
-	machineBlueprint, resp, err := c.CaasClient.ClusterAdminApi.V1MachineblueprintsIdGet(clientCtx, id, applianceID)
+	field := "applianceID eq " + applianceID
+	machineBlueprint, resp, err := c.CaasClient.ClusterAdminApi.V1MachineblueprintsIdGet(clientCtx, id, field, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -139,7 +139,8 @@ func testCaasClusterBlueprintDestroy(name string) resource.TestCheckFunc {
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 
 		var clusterBlueprint *mcaasapi.ClusterBlueprint
-		clusterBlueprints, _, err := p.CaasClient.ClusterAdminApi.V1ClusterblueprintsGet(clientCtx, siteID)
+		field := "applianceID eq " + siteID
+		clusterBlueprints, _, err := p.CaasClient.ClusterAdminApi.V1ClusterblueprintsGet(clientCtx, field, nil)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster blueprint list %w", err)
 		}

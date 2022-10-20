@@ -98,7 +98,7 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		SpaceID:            spaceID,
 	}
 
-	cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersPost(clientCtx, createCluster)
+	cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersPost(clientCtx, createCluster, nil)
 	if err != nil {
 		errMessage := utils.GetErrorMessage(err, resp.StatusCode)
 		diags = append(diags, diag.Errorf("Error in ClustersPost: %s - %s", err, errMessage)...)
@@ -212,8 +212,8 @@ func clusterReadContext(ctx context.Context, d *schema.ResourceData, meta interf
 	var diags diag.Diagnostics
 	id := d.Id()
 	spaceID := d.Get("space_id").(string)
-
-	cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersIdGet(clientCtx, id, spaceID)
+    field := "spaceID eq " + spaceID
+	cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersIdGet(clientCtx, id, field, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -386,8 +386,8 @@ func createGetTokenFunc(
 			return "", err
 		}
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
-
-		clusters, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersGet(clientCtx, spaceID)
+        field := "spaceID eq " + spaceID
+		clusters, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersGet(clientCtx, field, nil)
 		if err != nil {
 			if resp != nil {
 				// Check err response code to see if we need to retry

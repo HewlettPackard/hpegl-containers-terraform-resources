@@ -45,8 +45,8 @@ func dataSourceClusterBlueprintReadContext(ctx context.Context, d *schema.Resour
 	var diags diag.Diagnostics
 
 	siteID := d.Get("site_id").(string)
-
-	blueprints, resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsGet(clientCtx, siteID)
+	field := "applianceID eq " + siteID
+	blueprints, resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsGet(clientCtx, field, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}

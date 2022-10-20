@@ -45,8 +45,8 @@ func dataSourceApplianceReadContext(ctx context.Context, d *schema.ResourceData,
 	var diags diag.Diagnostics
 
 	spaceID := d.Get("space_id").(string)
-
-	appliances, resp, err := c.CaasClient.SiteApi.V1AppliancesGet(clientCtx, spaceID)
+	field := "spaceID eq " + spaceID
+	appliances, resp, err := c.CaasClient.SiteApi.V1AppliancesGet(clientCtx, field, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
