@@ -4,7 +4,7 @@ name: GitHub Actions CI
 on: [push, pull_request]
 jobs:
   ci:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     strategy:
       matrix:
         go: [ '1.17' ]
