@@ -58,7 +58,7 @@ func testCaasMachineBlueprint() string {
 		compute_type = "%s"
 		size = "%s"
 		storage_type = "%s"
-        workerType = "%s"
+        worker_type = "%s"
 	}`, apiURLMBp, siteNameMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType, workerType)
 }
 
