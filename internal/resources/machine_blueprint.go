@@ -60,8 +60,7 @@ func machineBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 		machineRolesStr = append(machineRolesStr, mcaasapi.MachineRolesType(valStr))
 	}
 
-	var workerType mcaasapi.MachineWorkerType
-	workerType = mcaasapi.MachineWorkerType(d.Get("worker_type").(string))
+	workerType := mcaasapi.MachineWorkerType(d.Get("worker_type").(string))
 
 	createMachineBlueprint := mcaasapi.MachineBlueprint{
 
