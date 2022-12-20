@@ -183,7 +183,7 @@ func getControlPlaneNodeDetails(controlPlaneNodes map[string]interface{}) mcaasa
 func getWorkerNodeDetails(workerNode map[string]interface{}) mcaasapi.MachineSet {
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: workerNode["machine_blueprint_id"].(string),
-		Count:              workerNode["count"].(int32),
+		Count:              int32(workerNode["count"].(float64)),
 		Name:               workerNode["name"].(string),
 	}
 	return wn

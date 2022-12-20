@@ -548,7 +548,7 @@ func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta inte
 func getDefaultMachineSet(defaultMachineSet map[string]interface{}) mcaasapi.MachineSet {
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: defaultMachineSet["machine_blueprint_id"].(string),
-		Count:              defaultMachineSet["count"].(int32),
+		Count:              int32(defaultMachineSet["count"].(float64)),
 		Name:               defaultMachineSet["name"].(string),
 		OsImage:            defaultMachineSet["os_image"].(string),
 		OsVersion:          defaultMachineSet["os_version"].(string),
