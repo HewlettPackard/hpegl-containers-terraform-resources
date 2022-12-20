@@ -4,6 +4,7 @@ package resources
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net"
 	"net/http"
@@ -98,7 +99,7 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		SpaceID:            spaceID,
 	}
 
-	cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersPost(clientCtx, createCluster, nil)
+	cluster, resp, err := c.CaasClient.ClustersApi.V1ClustersPost(clientCtx, createCluster)
 	if err != nil {
 		errMessage := utils.GetErrorMessage(err, resp.StatusCode)
 		diags = append(diags, diag.Errorf("Error in ClustersPost: %s - %s", err, errMessage)...)
@@ -147,12 +148,18 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		machineSets = append(defaultMachineSets, machineSets...)
+		temp, err := json.Marshal(machineSets)
+		if err != nil {
+			return diag.Errorf("Error in parsing machinesets response %s", err)
+		}
+		var finalMachineSets []mcaasapi.AllOfUpdateClusterMachineSetsItems
+		_ = json.Unmarshal(temp, &finalMachineSets)
 		updateCluster := mcaasapi.UpdateCluster{
-			MachineSets: machineSets,
+			MachineSets: finalMachineSets,
 		}
 
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
-		cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersIdPut(clientCtx, updateCluster, cluster.Id)
+		cluster, resp, err := c.CaasClient.ClustersApi.V1ClustersIdPut(clientCtx, updateCluster, cluster.Id)
 		if err != nil {
 			errMessage := utils.GetErrorMessage(err, resp.StatusCode)
 			diags = append(diags, diag.Errorf("Error in V1ClustersIdPut: %s - %s", err, errMessage)...)
@@ -213,7 +220,7 @@ func clusterReadContext(ctx context.Context, d *schema.ResourceData, meta interf
 	id := d.Id()
 	spaceID := d.Get("space_id").(string)
 	field := "spaceID eq " + spaceID
-	cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersIdGet(clientCtx, id, field, nil)
+	cluster, resp, err := c.CaasClient.ClustersApi.V1ClustersIdGet(clientCtx, id, field, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -223,7 +230,7 @@ func clusterReadContext(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(err)
 	}
 
-	kubeconfig, _, err := c.CaasClient.ClusterAdminApi.V1ClustersIdKubeconfigGet(clientCtx, id)
+	kubeconfig, _, err := c.CaasClient.KubeConfigApi.V1ClustersIdKubeconfigGet(clientCtx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -337,7 +344,7 @@ func clusterDeleteContext(ctx context.Context, d *schema.ResourceData, meta inte
 	id := d.Id()
 	spaceID := d.Get("space_id").(string)
 
-	_, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersIdDelete(clientCtx, id)
+	resp, err := c.CaasClient.ClustersApi.V1ClustersIdDelete(clientCtx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -387,7 +394,7 @@ func createGetTokenFunc(
 		}
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 		field := "spaceID eq " + spaceID
-		clusters, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersGet(clientCtx, field, nil)
+		clusters, resp, err := c.CaasClient.ClustersApi.V1ClustersGet(clientCtx, field, nil)
 		if err != nil {
 			if resp != nil {
 				// Check err response code to see if we need to retry
@@ -501,12 +508,17 @@ func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		}
 
 		machineSets = append(machineSets, defaultMachineSets...)
-
+		temp, err := json.Marshal(machineSets)
+		if err != nil {
+			return diag.Errorf("Error in parsing machinesets response %s", err)
+		}
+		var finalMachineSets []mcaasapi.AllOfUpdateClusterMachineSetsItems
+		_ = json.Unmarshal(temp, &finalMachineSets)
 		updateCluster := mcaasapi.UpdateCluster{
-			MachineSets: machineSets,
+			MachineSets: finalMachineSets,
 		}
 		clusterID := d.Id()
-		cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersIdPut(clientCtx, updateCluster, clusterID)
+		cluster, resp, err := c.CaasClient.ClustersApi.V1ClustersIdPut(clientCtx, updateCluster, clusterID)
 		if err != nil {
 			errMessage := utils.GetErrorMessage(err, resp.StatusCode)
 			diags = append(diags, diag.Errorf("Error in V1ClustersIdPut: %s - %s", err, errMessage)...)
@@ -536,7 +548,7 @@ func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta inte
 func getDefaultMachineSet(defaultMachineSet map[string]interface{}) mcaasapi.MachineSet {
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: defaultMachineSet["machine_blueprint_id"].(string),
-		Count:              defaultMachineSet["count"].(float64),
+		Count:              defaultMachineSet["count"].(int32),
 		Name:               defaultMachineSet["name"].(string),
 		OsImage:            defaultMachineSet["os_image"].(string),
 		OsVersion:          defaultMachineSet["os_version"].(string),

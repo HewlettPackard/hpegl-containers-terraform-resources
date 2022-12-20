@@ -27,6 +27,7 @@ const (
 	storageType     = "General Purpose"
 	apiURLMBp       = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 	siteNameMbp     = "Austin"
+	workerType      = "Virtual"
 )
 
 var machineRoles = []string{"worker"}
@@ -57,7 +58,8 @@ func testCaasMachineBlueprint() string {
 		compute_type = "%s"
 		size = "%s"
 		storage_type = "%s"
-	}`, apiURLMBp, siteNameMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType)
+        workerType = "%s"
+	}`, apiURLMBp, siteNameMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType, workerType)
 }
 
 func TestCaasMachineBlueprintCreate(t *testing.T) {
@@ -125,7 +127,7 @@ func testCaasMachineBlueprintDestroy(name string) resource.TestCheckFunc {
 
 		var machineBlueprint *mcaasapi.MachineBlueprint
 		field := "applianceID eq " + siteID
-		machineBlueprints, _, err := p.CaasClient.ClusterAdminApi.V1MachineblueprintsGet(clientCtx, field, nil)
+		machineBlueprints, _, err := p.CaasClient.MachineBlueprintsApi.V1MachineblueprintsGet(clientCtx, field, nil)
 		if err != nil {
 			return fmt.Errorf("Error in getting machine blueprint list %w", err)
 		}

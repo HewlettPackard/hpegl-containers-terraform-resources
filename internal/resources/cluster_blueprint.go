@@ -72,7 +72,7 @@ func clusterBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 		MachineSets:         machineSetsList,
 	}
 
-	clusterBlueprint, resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsPost(clientCtx, createClusterBlueprint)
+	clusterBlueprint, resp, err := c.CaasClient.ClusterBlueprintsApi.V1ClusterblueprintsPost(clientCtx, createClusterBlueprint)
 	if err != nil {
 		errMessage := utils.GetErrorMessage(err, resp.StatusCode)
 		diags = append(diags, diag.Errorf("Error in ClustersBlueprintPost: %s - %s", err, errMessage)...)
@@ -158,7 +158,7 @@ func clusterBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 	id := d.Id()
 
-	resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsIdDelete(clientCtx, id)
+	resp, err := c.CaasClient.ClusterBlueprintsApi.V1ClusterblueprintsIdDelete(clientCtx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -175,7 +175,7 @@ func getControlPlaneNodeDetails(controlPlaneNodes map[string]interface{}) mcaasa
 	cp := mcaasapi.MachineSet{
 		Name:               "master",
 		MachineBlueprintId: controlPlaneNodes["machine_blueprint_id"].(string),
-		Count:              count,
+		Count:              int32(count),
 	}
 	return cp
 }
@@ -183,7 +183,7 @@ func getControlPlaneNodeDetails(controlPlaneNodes map[string]interface{}) mcaasa
 func getWorkerNodeDetails(workerNode map[string]interface{}) mcaasapi.MachineSet {
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: workerNode["machine_blueprint_id"].(string),
-		Count:              workerNode["count"].(float64),
+		Count:              workerNode["count"].(int32),
 		Name:               workerNode["name"].(string),
 	}
 	return wn

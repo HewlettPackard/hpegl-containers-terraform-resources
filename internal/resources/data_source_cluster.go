@@ -45,7 +45,7 @@ func dataSourceClusterReadContext(ctx context.Context, d *schema.ResourceData, m
 
 	spaceID := d.Get("space_id").(string)
 	field := "spaceID eq " + spaceID
-	clusters, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersGet(clientCtx, field, nil)
+	clusters, resp, err := c.CaasClient.ClustersApi.V1ClustersGet(clientCtx, field, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -68,7 +68,7 @@ func dataSourceClusterReadContext(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	kubeconfig, _, err := c.CaasClient.ClusterAdminApi.V1ClustersIdKubeconfigGet(clientCtx, cluster.Id)
+	kubeconfig, _, err := c.CaasClient.KubeConfigApi.V1ClustersIdKubeconfigGet(clientCtx, cluster.Id)
 	if err != nil {
 		return diag.FromErr(err)
 	}

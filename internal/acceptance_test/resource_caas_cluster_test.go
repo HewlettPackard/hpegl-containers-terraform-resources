@@ -172,7 +172,7 @@ func checkCaasClusterUpdate(name string) resource.TestCheckFunc {
 		}
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 		field := "spaceID eq " + spaceID
-		cluster, _, err := p.CaasClient.ClusterAdminApi.V1ClustersIdGet(clientCtx, id, field, nil)
+		cluster, _, err := p.CaasClient.ClustersApi.V1ClustersIdGet(clientCtx, id, field, nil)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster list %w", err)
 		}
@@ -214,7 +214,7 @@ func testCaasClusterDestroy(name string) resource.TestCheckFunc {
 
 		var cluster *mcaasapi.Cluster
 		field := "spaceID eq " + spaceID
-		clusters, _, err := p.CaasClient.ClusterAdminApi.V1ClustersGet(clientCtx, field, nil)
+		clusters, _, err := p.CaasClient.ClustersApi.V1ClustersGet(clientCtx, field, nil)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster list %w", err)
 		}
