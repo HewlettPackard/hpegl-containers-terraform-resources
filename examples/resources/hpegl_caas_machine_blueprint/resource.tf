@@ -29,6 +29,7 @@ resource hpegl_caas_machine_blueprint test {
  site_id = data.hpegl_caas_site.blr.id
  machine_roles = ["controlplane"]
  machine_provider = "vmaas"
+ worker_type = ""
  os_image = "sles-custom"
  os_version = ""
  compute_type = ""
