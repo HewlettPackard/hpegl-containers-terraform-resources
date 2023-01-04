@@ -13,9 +13,9 @@ jobs:
       - name: Checkout workspace
         uses: actions/checkout@v2
 
-      - name: Install build-essential
+      - name: Install gcc
         run: |
-          sudo apt-get install build-essential
+          sudo zypper install gcc-c++
 
       - name: Set up Go
         uses: actions/setup-go@v2
