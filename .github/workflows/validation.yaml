@@ -13,10 +13,6 @@ jobs:
       - name: Checkout workspace
         uses: actions/checkout@v2
 
-      - name: Install gcc
-        run: |
-          sudo zypper install gcc-c++
-
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
