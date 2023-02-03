@@ -21,12 +21,12 @@ import (
 const (
 	// Fill in these values based on the environment being used for acceptance testing
 	name                = "test-cluster-bp"
-	defaultStorageClass = "gl-sbc-glhcnimblestor"
+	defaultStorageClass = "gl-sbc-glhc-nimblestor"
 	clusterProvider     = "ecp"
 	cpCount             = "1"
 	workerName          = "worker1"
 	workerCount         = "1"
-	kubernetesVersion   = "v1.20.11.hpe-2"
+	kubernetesVersion   = "v1.23.10-hpe2"
 	apiURLCbp           = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 	siteNameCBp         = "Austin"
 )
