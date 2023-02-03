@@ -50,11 +50,11 @@ func testCaasClusterBlueprint() string {
 		space_id = var.HPEGL_SPACE
 	}
     data "hpegl_caas_machine_blueprint" "mbcontrolplane" {
-  		name = "standard-master"
+  		name = "large-master"
   		site_id = data.hpegl_caas_site.site.id
 	}
 	data "hpegl_caas_machine_blueprint" "mbworker" {
-  		name = "standard-worker"
+  		name = "g2i-xlarge-worker"
   		site_id = data.hpegl_caas_site.site.id
 	}
 	resource hpegl_caas_cluster_blueprint testcb {

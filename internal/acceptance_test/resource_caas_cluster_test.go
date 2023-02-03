@@ -43,7 +43,7 @@ func testCaasCluster(clusterName string) string {
 			space_id = var.HPEGL_SPACE
 		}
 		data "hpegl_caas_cluster_blueprint" "bp" {
-			name = "demo"
+			name = "g2i-demo"
 			site_id = data.hpegl_caas_site.site.id
 		}
 	resource hpegl_caas_cluster testcluster {
@@ -70,11 +70,11 @@ func testCaasClusterUpdate(clusterName string) string {
 			space_id = var.HPEGL_SPACE
 		}
 		data "hpegl_caas_cluster_blueprint" "bp" {
-			name = "demo"
+			name = "g2i-demo"
 			site_id = data.hpegl_caas_site.site.id
 		}
 		data "hpegl_caas_machine_blueprint" "mbworker" {
-			name = "standard-worker"
+			name = "g2i-large-worker"
 		site_id = data.hpegl_caas_site.site.id
 	  }
 	resource hpegl_caas_cluster testcluster {
