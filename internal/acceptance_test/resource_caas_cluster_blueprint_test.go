@@ -26,7 +26,7 @@ const (
 	cpCount             = "1"
 	workerName          = "worker1"
 	workerCount         = "1"
-	kubernetesVersion   = "v1.23.10-hpe2"
+	kubernetesVersion   = "1.23.10-hpe2"
 	apiURLCbp           = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 	siteNameCBp         = "Austin"
 )
