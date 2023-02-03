@@ -1,6 +1,6 @@
 module github.com/HewlettPackard/hpegl-containers-terraform-resources
 
-go 1.17
+go 1.19
 
 require (
 	github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.13
