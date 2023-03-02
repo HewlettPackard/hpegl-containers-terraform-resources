@@ -1,18 +1,17 @@
-// (C) Copyright 2020-2022 Hewlett Packard Enterprise Development LP
+// (C) Copyright 2020-2023 Hewlett Packard Enterprise Development LP
 
 package resources
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strconv"
-
+	"fmt"
 	"github.com/HewlettPackard/hpegl-containers-go-sdk/pkg/mcaasapi"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/resources/schemas"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/auth"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/client"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func ClusterBlueprint() *schema.Resource {
@@ -50,10 +49,6 @@ func clusterBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 	var machineSetsList []mcaasapi.MachineSet
 
-	controlPlaneMap := d.Get("control_plane_nodes").(map[string]interface{})
-	controlPlaneDetails := getControlPlaneNodeDetails(controlPlaneMap)
-	machineSetsList = append(machineSetsList, controlPlaneDetails)
-
 	workerNodesList := d.Get("worker_nodes").([]interface{})
 	for _, workerNode := range workerNodesList {
 		worker, ok := workerNode.(map[string]interface{})
@@ -69,6 +64,7 @@ func clusterBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 		DefaultStorageClass: d.Get("default_storage_class").(string),
 		ApplianceID:         d.Get("site_id").(string),
 		ClusterProvider:     d.Get("cluster_provider").(string),
+		ControlPlaneCount:   int32(d.Get("control_plane_count").(float64)),
 		MachineSets:         machineSetsList,
 	}
 
@@ -169,22 +165,13 @@ func clusterBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, 
 	return diags
 }
 
-func getControlPlaneNodeDetails(controlPlaneNodes map[string]interface{}) mcaasapi.MachineSet {
-	c := controlPlaneNodes["count"].(string)
-	count, _ := strconv.ParseFloat(c, 64)
-	cp := mcaasapi.MachineSet{
-		Name:               "master",
-		MachineBlueprintId: controlPlaneNodes["machine_blueprint_id"].(string),
-		Count:              int32(count),
-	}
-	return cp
-}
-
 func getWorkerNodeDetails(workerNode map[string]interface{}) mcaasapi.MachineSet {
+	osVersion := fmt.Sprintf("%v,", workerNode["os_version"])
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: workerNode["machine_blueprint_id"].(string),
 		Count:              int32(workerNode["count"].(float64)),
 		Name:               workerNode["name"].(string),
+		OsVersion:          osVersion,
 	}
 	return wn
 }

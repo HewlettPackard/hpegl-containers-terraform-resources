@@ -31,12 +31,9 @@ func ClusterBlueprintCreate() map[string]*schema.Schema {
 			ForceNew: true,
 			Required: true,
 		},
-		"control_plane_nodes": {
-			Type:     schema.TypeMap,
+		"control_plane_count": {
+			Type:     schema.TypeFloat,
 			ForceNew: true,
-			Elem: &schema.Schema{
-				Type: schema.TypeString,
-			},
 			Required: true,
 		},
 		"worker_nodes": {
