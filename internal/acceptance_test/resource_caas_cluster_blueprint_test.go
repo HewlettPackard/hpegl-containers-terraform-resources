@@ -27,8 +27,9 @@ const (
 	workerName          = "worker1"
 	workerCount         = "1"
 	kubernetesVersion   = "1.23.10-hpe2"
-	apiURLCbp           = "https://mcaas.us1.greenlake-hpe.com/mcaas"
-	siteNameCBp         = "Austin"
+	apiURLCbp           = "https://mcaas.intg.hpedevops.net/mcaas"
+	siteNameCBp         = "FTC"
+	//apiURLCbp           = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 )
 
 // nolint: gosec
@@ -54,7 +55,7 @@ func testCaasClusterBlueprint() string {
   		site_id = data.hpegl_caas_site.site.id
 	}
 	data "hpegl_caas_machine_blueprint" "mbworker" {
-  		name = "g2i-xlarge-worker"
+  		name = "xlarge-worker"
   		site_id = data.hpegl_caas_site.site.id
 	}
 	resource hpegl_caas_cluster_blueprint testcb {
