@@ -52,10 +52,10 @@ func testCaasCluster(clusterName string) string {
 		blueprint_id = data.hpegl_caas_cluster_blueprint.bp.id
         site_id = data.hpegl_caas_site.site.id
 		space_id     = var.HPEGL_SPACE
-	}
-	timeouts {
-        create = "2h"
-    }`, apiURL, siteName, clusterName)
+		timeouts {
+			create = "2h"
+		}
+	}`, apiURL, siteName, clusterName)
 }
 
 // nolint: gosec
