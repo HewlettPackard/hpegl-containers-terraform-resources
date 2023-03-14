@@ -23,11 +23,12 @@ const (
 	osImage         = "sles-custom"
 	osVersion       = "15"
 	computeType     = "General Purpose"
-	size            = "Large"
+	size            = "G1-CN-xLarge"
 	storageType     = "General Purpose"
-	apiURLMBp       = "https://mcaas.us1.greenlake-hpe.com/mcaas"
-	siteNameMbp     = "Austin"
+	apiURLMBp       = "https://mcaas.intg.hpedevops.net/mcaas"
+	siteNameMbp     = "FTC"
 	workerType      = "Virtual"
+	//apiURLMBp       = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 )
 
 var machineRoles = []string{"worker"}

@@ -1,5 +1,5 @@
 # Copyright 2022-2023 Hewlett Packard Enterprise Development LP
-name: GitHub Actions CI
+name: Acceptance Tests(excluding cluster create test)
 
 on: [push, pull_request]
 jobs:
@@ -7,8 +7,7 @@ jobs:
     runs-on: self-hosted
     strategy:
       matrix:
-        go: [ '1.17' ]
-    name: Acceptance Tests(excluding cluster create test)
+        go: [ '1.19' ]
     steps:
       - name: Checkout workspace
         uses: actions/checkout@v2

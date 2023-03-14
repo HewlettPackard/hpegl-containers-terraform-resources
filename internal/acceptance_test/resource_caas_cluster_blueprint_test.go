@@ -21,14 +21,15 @@ import (
 const (
 	// Fill in these values based on the environment being used for acceptance testing
 	name                = "test-cluster-bp"
-	defaultStorageClass = "gl-sbc-glhcnimblestor"
+	defaultStorageClass = "gl-sbc-glhc-nimblestor"
 	clusterProvider     = "ecp"
 	cpCount             = "1"
 	workerName          = "worker1"
 	workerCount         = "1"
-	kubernetesVersion   = "v1.20.11.hpe-2"
-	apiURLCbp           = "https://mcaas.us1.greenlake-hpe.com/mcaas"
-	siteNameCBp         = "Austin"
+	kubernetesVersion   = "1.23.10-hpe2"
+	apiURLCbp           = "https://mcaas.intg.hpedevops.net/mcaas"
+	siteNameCBp         = "FTC"
+	//apiURLCbp           = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 )
 
 // nolint: gosec
@@ -50,11 +51,11 @@ func testCaasClusterBlueprint() string {
 		space_id = var.HPEGL_SPACE
 	}
     data "hpegl_caas_machine_blueprint" "mbcontrolplane" {
-  		name = "standard-master"
+  		name = "large-master"
   		site_id = data.hpegl_caas_site.site.id
 	}
 	data "hpegl_caas_machine_blueprint" "mbworker" {
-  		name = "standard-worker"
+  		name = "xlarge-worker"
   		site_id = data.hpegl_caas_site.site.id
 	}
 	resource hpegl_caas_cluster_blueprint testcb {
