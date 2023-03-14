@@ -64,10 +64,7 @@ func testCaasClusterBlueprint() string {
   		default_storage_class = "%s"
   		site_id = data.hpegl_caas_site.site.id
   		cluster_provider = "%s"
-		control_plane_nodes = {
-    		machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbcontrolplane.id
-			count = "%s"
-  		}
+		control_plane_count = "%s"
   		worker_nodes {
 			name = "%s"
       		machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
