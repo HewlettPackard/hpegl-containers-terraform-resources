@@ -32,6 +32,7 @@ const (
 	stateReady          = "ready"
 	stateDeleted        = "deleted"
 	stateUpdating       = "updating"
+	stateUpgrading      = "upgrading"
 
 	stateRetrying = "retrying" // placeholder state used to allow retrying after errors
 
@@ -188,7 +189,7 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 
 		createStateConf := resource.StateChangeConf{
 			Delay:      0,
-			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating, stateDeProvisioning},
+			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating, stateDeProvisioning, stateUpgrading},
 			Target:     []string{stateReady},
 			Timeout:    d.Timeout("create"),
 			MinTimeout: pollingInterval,
@@ -505,7 +506,7 @@ func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta inte
 
 	clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 	var diags diag.Diagnostics
-	newK8sVersionInterface, k8sVersionPresent := d.GetOk("kubernetesVersion")
+	newK8sVersionInterface, k8sVersionPresent := d.GetOk("kubernetes_version")
 
 	if d.HasChange("worker_nodes") || k8sVersionPresent {
 		machineSets := []mcaasapi.MachineSet{}
@@ -560,7 +561,7 @@ func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		spaceID := d.Get("space_id").(string)
 		createStateConf := resource.StateChangeConf{
 			Delay:      0,
-			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating, stateDeProvisioning},
+			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating, stateDeProvisioning, stateUpgrading},
 			Target:     []string{stateReady},
 			Timeout:    d.Timeout("create"),
 			MinTimeout: pollingInterval,
@@ -586,21 +587,23 @@ func getDefaultMachineSet(defaultMachineSet map[string]interface{}) mcaasapi.Mac
 	}
 	return wn
 }
-
 func getDefaultMachineSetDetail(defaultMachineSetDetail map[string]interface{}) mcaasapi.MachineSetDetail {
+	mr := defaultMachineSetDetail["machine_roles"].([]interface{})
+	MachineRoles := make([]mcaasapi.MachineRolesType, 0, len(mr))
+	for _, v := range mr {
+		MachineRoles = append(MachineRoles, mcaasapi.MachineRolesType(v.(string)))
+	}
+
 	wnd := mcaasapi.MachineSetDetail{
 		Name:                defaultMachineSetDetail["name"].(string),
 		OsImage:             defaultMachineSetDetail["os_image"].(string),
 		OsVersion:           defaultMachineSetDetail["os_version"].(string),
 		Count:               int32(defaultMachineSetDetail["count"].(float64)),
-		MachineRoles:        defaultMachineSetDetail["machine_roles"].([]mcaasapi.MachineRolesType),
+		MachineRoles:        MachineRoles,
 		MachineProvider:     defaultMachineSetDetail["machine_provider"].(string),
 		Size:                defaultMachineSetDetail["size"].(string),
-		SizeDetail:          defaultMachineSetDetail["size_detail"].(*mcaasapi.AllOfMachineSetDetailSizeDetail),
 		ComputeInstanceType: defaultMachineSetDetail["compute_type"].(string),
 		StorageInstanceType: defaultMachineSetDetail["storage_type"].(string),
-		Networks:            defaultMachineSetDetail["networks"].([]string),
-		Machines:            defaultMachineSetDetail["machines"].([]mcaasapi.Machine),
 	}
 	return wnd
 }
@@ -618,19 +621,14 @@ func GetDefaultWorkersName(d *schema.ResourceData) ([]string, error) {
 	var workerNames []string
 
 	for _, msd := range defaultMachineSetsDetail {
-		var found bool
-		var workerName string
 		for _, role := range msd.MachineRoles {
 			if role == "worker" {
-				found = true
-				workerName = msd.Name
+				workerNames = append(workerNames, msd.Name)
 			}
 		}
-		if !found {
-			return nil, fmt.Errorf("Worker node not present in the cluster")
-		}
-		workerNames = append(workerNames, workerName)
 	}
-
+	if len(workerNames) == 0 {
+		return nil, fmt.Errorf("Worker node not present in the cluster")
+	}
 	return workerNames, nil
 }

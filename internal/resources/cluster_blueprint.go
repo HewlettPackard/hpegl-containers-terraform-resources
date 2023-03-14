@@ -166,12 +166,19 @@ func clusterBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, 
 }
 
 func getWorkerNodeDetails(workerNode map[string]interface{}) mcaasapi.MachineSet {
-	osVersion := fmt.Sprintf("%v,", workerNode["os_version"])
+	osImage := ""
+	osVersion := ""
+	if workerNode["os_image"] != nil && workerNode["os_version"] != nil {
+		osVersion = fmt.Sprintf("%v", workerNode["os_version"])
+		osImage = fmt.Sprintf("%v", workerNode["os_image"])
+	}
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: workerNode["machine_blueprint_id"].(string),
 		Count:              int32(workerNode["count"].(float64)),
 		Name:               workerNode["name"].(string),
+		OsImage:            osImage,
 		OsVersion:          osVersion,
 	}
 	return wn
+
 }
