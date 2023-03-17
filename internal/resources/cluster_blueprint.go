@@ -53,7 +53,7 @@ func clusterBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 	for _, workerNode := range workerNodesList {
 		worker, ok := workerNode.(map[string]interface{})
 		if ok {
-			workerNodeDetails := getWorkerNodeDetails(worker)
+			workerNodeDetails := getWorkerNodeDetails(d, worker)
 			machineSetsList = append(machineSetsList, workerNodeDetails)
 		}
 	}
@@ -165,12 +165,23 @@ func clusterBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, 
 	return diags
 }
 
-func getWorkerNodeDetails(workerNode map[string]interface{}) mcaasapi.MachineSet {
+func getWorkerNodeDetails(d *schema.ResourceData, workerNode map[string]interface{}) mcaasapi.MachineSet {
 	osImage := ""
 	osVersion := ""
-	if workerNode["os_image"] != nil && workerNode["os_version"] != nil {
+	machines, ok := d.GetOk("machine_sets")
+	machinesets := machines.([]interface{})
+
+	if workerNode["os_image"].(string) != "" && workerNode["os_version"].(string) != "" {
 		osVersion = fmt.Sprintf("%v", workerNode["os_version"])
 		osImage = fmt.Sprintf("%v", workerNode["os_image"])
+	} else if ok{
+		for _, machinesetInt := range machinesets {
+			machineset := machinesetInt.(map[string]interface{})
+			if workerNode["name"] == machineset["name"] {
+				osVersion = fmt.Sprintf("%v", machineset["os_version"])
+				osImage = fmt.Sprintf("%v", machineset["os_image"])
+			}
+		}
 	}
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: workerNode["machine_blueprint_id"].(string),
@@ -180,5 +191,4 @@ func getWorkerNodeDetails(workerNode map[string]interface{}) mcaasapi.MachineSet
 		OsVersion:          osVersion,
 	}
 	return wn
-
 }
