@@ -169,12 +169,12 @@ func getWorkerNodeDetails(d *schema.ResourceData, workerNode map[string]interfac
 	osImage := ""
 	osVersion := ""
 	machines, ok := d.GetOk("machine_sets")
-	machinesets := machines.([]interface{})
 
-	if workerNode["os_image"].(string) != "" && workerNode["os_version"].(string) != "" {
-		osVersion = fmt.Sprintf("%v", workerNode["os_version"])
-		osImage = fmt.Sprintf("%v", workerNode["os_image"])
-	} else if ok {
+	osVersion = fmt.Sprintf("%v", workerNode["os_version"])
+	osImage = fmt.Sprintf("%v", workerNode["os_image"])
+
+	if osVersion == "" && osImage == "" && ok{
+		machinesets := machines.([]interface{})
 		for _, machinesetInt := range machinesets {
 			machineset := machinesetInt.(map[string]interface{})
 			if workerNode["name"] == machineset["name"] {
