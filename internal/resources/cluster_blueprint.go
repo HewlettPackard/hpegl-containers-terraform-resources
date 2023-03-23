@@ -173,7 +173,7 @@ func getWorkerNodeDetails(d *schema.ResourceData, workerNode map[string]interfac
 	osVersion = fmt.Sprintf("%v", workerNode["os_version"])
 	osImage = fmt.Sprintf("%v", workerNode["os_image"])
 
-	if osVersion == "" && osImage == "" && ok{
+	if osVersion == "" && osImage == "" && ok {
 		machinesets := machines.([]interface{})
 		for _, machinesetInt := range machinesets {
 			machineset := machinesetInt.(map[string]interface{})
