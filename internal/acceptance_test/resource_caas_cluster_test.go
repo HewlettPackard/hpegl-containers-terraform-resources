@@ -21,10 +21,13 @@ import (
 )
 
 const (
-	clusterPrefix  = "test"
-	apiURL         = "https://mcaas.intg.hpedevops.net/mcaas"
-	siteName       = "FTC"
-	testWorkerNode = "testworkernode"
+	clusterPrefix           = "test"
+	apiURL                  = "https://mcaas.intg.hpedevops.net/mcaas"
+	siteName                = "FTC"
+	testWorkerNode          = "worker2"
+	defaultWorkerNode       = "worker"
+	osVersionUpdate         = "15.3"
+	kubernetesVersionUpdate = "1.23.13-hpe2"
 	//apiURL         = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 )
 
@@ -44,7 +47,7 @@ func testCaasCluster(clusterName string) string {
 			space_id = var.HPEGL_SPACE
 		}
 		data "hpegl_caas_cluster_blueprint" "bp" {
-			name = "demo"
+			name = "demo-test"
 			site_id = data.hpegl_caas_site.site.id
 		}
 	resource hpegl_caas_cluster testcluster {
@@ -63,7 +66,7 @@ func testCaasClusterUpdate(clusterName string) string {
 	return fmt.Sprintf(`
 	provider hpegl {
 		caas {
-			api_url = "%s"
+			api_url = "%s" 
 		}
 	}
 	variable "HPEGL_SPACE" {
@@ -74,7 +77,7 @@ func testCaasClusterUpdate(clusterName string) string {
 			space_id = var.HPEGL_SPACE
 		}
 		data "hpegl_caas_cluster_blueprint" "bp" {
-			name = "demo"
+			name = "demo-test"
 			site_id = data.hpegl_caas_site.site.id
 		}
 		data "hpegl_caas_machine_blueprint" "mbworker" {
@@ -92,7 +95,84 @@ func testCaasClusterUpdate(clusterName string) string {
 			machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
 			count = "1"
 		  }
+        timeouts {
+			create = "2h"
+            update = "2h"
+		}
 	}`, apiURL, siteName, clusterName, testWorkerNode)
+}
+
+func testCaasClusterOsVersionUpdate(clusterName string) string {
+	return fmt.Sprintf(`
+	provider hpegl {
+		caas {
+			api_url = "%s"
+		}
+	}
+	variable "HPEGL_SPACE" {
+  		type = string
+	}
+		data "hpegl_caas_site" "site" {
+			name = "%s"
+			space_id = var.HPEGL_SPACE
+		}
+		data "hpegl_caas_cluster_blueprint" "bp" {
+			name = "demo-test"
+			site_id = data.hpegl_caas_site.site.id
+		}
+		data "hpegl_caas_machine_blueprint" "mbworker" {
+			name = "xlarge-worker"
+		site_id = data.hpegl_caas_site.site.id
+	  }
+	resource hpegl_caas_cluster testcluster {
+		name         = "%v"
+		blueprint_id = data.hpegl_caas_cluster_blueprint.bp.id
+        site_id = data.hpegl_caas_site.site.id
+		space_id     = var.HPEGL_SPACE
+		
+		worker_nodes {
+			name = "%s"
+			machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
+			count = "3"
+            os_version = "%s"
+            os_Image = "%s"
+		  }
+        timeouts {
+			create = "2h"
+            update = "2h"
+		}
+	}`, apiURL, siteName, clusterName, defaultWorkerNode, osVersionUpdate, osImage)
+}
+
+func testCaasClusterk8sVersionUpdate(clusterName string) string {
+	return fmt.Sprintf(`
+	provider hpegl {
+		caas {
+			api_url = "%s"
+		}
+	}
+	variable "HPEGL_SPACE" {
+  		type = string
+	}
+		data "hpegl_caas_site" "site" {
+			name = "%s"
+			space_id = var.HPEGL_SPACE
+		}
+		data "hpegl_caas_cluster_blueprint" "bp" {
+			name = "demo-test"
+			site_id = data.hpegl_caas_site.site.id
+		}
+	resource hpegl_caas_cluster testcluster {
+		name         = "%v"
+		blueprint_id = data.hpegl_caas_cluster_blueprint.bp.id
+        site_id = data.hpegl_caas_site.site.id
+		space_id     = var.HPEGL_SPACE
+        kubernetes_version = "%s"
+        timeouts {
+			create = "2h"
+            update = "2h"
+		}
+	}`, apiURL, siteName, clusterName, kubernetesVersionUpdate)
 }
 
 func TestCaasCreate(t *testing.T) {
@@ -115,6 +195,14 @@ func TestCaasCreate(t *testing.T) {
 			{
 				Config: testCaasClusterUpdate(clusterName),
 				Check:  resource.ComposeTestCheckFunc(checkCaasCluster("hpegl_caas_cluster.testcluster"), checkCaasClusterUpdate("hpegl_caas_cluster.testcluster")),
+			},
+			{
+				Config: testCaasClusterOsVersionUpdate(clusterName),
+				Check:  resource.ComposeTestCheckFunc(checkCaasCluster("hpegl_caas_cluster.testcluster"), checkCaasClusterOsVersionUpdate("hpegl_caas_cluster.testcluster")),
+			},
+			{
+				Config: testCaasClusterk8sVersionUpdate(clusterName),
+				Check:  resource.ComposeTestCheckFunc(checkCaasCluster("hpegl_caas_cluster.testcluster"), checkCaasClusterk8sVerionUpgrade("hpegl_caas_cluster.testcluster")),
 			},
 		},
 	})
@@ -189,6 +277,86 @@ func checkCaasClusterUpdate(name string) resource.TestCheckFunc {
 			return fmt.Errorf("Worker node pool %v not present in cluster %v", testWorkerNode, cluster.Name)
 		}
 
+		return nil
+	}
+}
+
+func checkCaasClusterOsVersionUpdate(name string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("Resource not found: %s", name)
+		}
+
+		spaceID := rs.Primary.Attributes["space_id"]
+		id := rs.Primary.Attributes["id"]
+
+		p, err := client.GetClientFromMetaMap(testAccProvider.Meta())
+		if err != nil {
+			return err
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+
+		token, err := auth.GetToken(ctx, testAccProvider.Meta())
+		if err != nil {
+			return fmt.Errorf("Failed getting a token: %w", err)
+		}
+		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
+		field := "spaceID eq " + spaceID
+		cluster, _, err := p.CaasClient.ClustersApi.V1ClustersIdGet(clientCtx, id, field, nil)
+		if err != nil {
+			return fmt.Errorf("Error in getting cluster list %w", err)
+		}
+		if !utils.WorkerPresentInMachineSets(cluster.MachineSets, defaultWorkerNode) {
+			return fmt.Errorf("Worker node pool %v not present in cluster %v", defaultWorkerNode, cluster.Name)
+		}
+
+		for _, ms := range cluster.MachineSets {
+			if ms.Name == defaultWorkerNode {
+				if ms.OsVersion != osVersionUpdate {
+					return fmt.Errorf("Incorrect os Version after upgrade, expected %v found %v", osVersionUpdate, ms.OsVersion)
+				}
+			}
+		}
+		return nil
+	}
+}
+
+func checkCaasClusterk8sVerionUpgrade(name string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[name]
+		if !ok {
+			return fmt.Errorf("Resource not found: %s", name)
+		}
+
+		spaceID := rs.Primary.Attributes["space_id"]
+		id := rs.Primary.Attributes["id"]
+
+		p, err := client.GetClientFromMetaMap(testAccProvider.Meta())
+		if err != nil {
+			return err
+		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+		defer cancel()
+
+		token, err := auth.GetToken(ctx, testAccProvider.Meta())
+		if err != nil {
+			return fmt.Errorf("Failed getting a token: %w", err)
+		}
+		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
+		field := "spaceID eq " + spaceID
+		cluster, _, err := p.CaasClient.ClustersApi.V1ClustersIdGet(clientCtx, id, field, nil)
+		if err != nil {
+			return fmt.Errorf("Error in getting cluster list %w", err)
+		}
+
+		if cluster.KubernetesVersion != kubernetesVersionUpdate {
+			return fmt.Errorf("Incorrect k8s Version after upgrade, expected %v found %v", kubernetesVersionUpdate, cluster.KubernetesVersion)
+
+		}
 		return nil
 	}
 }
