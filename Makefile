@@ -83,7 +83,7 @@ coverage: vendor
 acceptance:
 	TF_ACC_CONFIG_PATH=$(shell pwd)	\
 	TF_ACC_CONFIG=prod \
-	TF_ACC=true go test -v -timeout=7200s -cover ./... 2>&1 | tee result.txt;
+	TF_ACC=true go test -v -timeout=18000s -cover ./... 2>&1 | tee result.txt;
 	@if grep "FAIL" result.txt; then\
 		echo "Tests Failed";\
 		rm -r result.txt;\

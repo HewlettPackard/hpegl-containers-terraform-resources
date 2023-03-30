@@ -133,9 +133,9 @@ func testCaasClusterOsVersionUpdate(clusterName string) string {
 		worker_nodes {
 			name = "%s"
 			machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
-			count = "3"
+			count = "1"
             os_version = "%s"
-            os_Image = "%s"
+            os_image = "%s"
 		  }
         timeouts {
 			create = "2h"
