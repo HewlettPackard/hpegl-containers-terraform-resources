@@ -252,6 +252,21 @@ Note: Ensure there is no .terraform.lock.hcl or .terraform in examples/cluster-c
 
 Update examples/resources/hpegl_caas_cluster/resource.tf with all the the necessary values
 
+For dev/integ setup , the provider to be used in the .tf file is :
+```bash
+provider hpegl {
+  caas {
+    api_url = "https://mcaas.intg.hpedevops.net/mcaas"
+  }
+}
+```
+For prod setup , the provider to be used in the .tf file is :
+```bash
+provider hpegl {
+  caas {
+  }
+}
+```
 
 To create the terraform plan:
 
