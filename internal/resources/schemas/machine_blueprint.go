@@ -70,5 +70,10 @@ func MachineBlueprint() map[string]*schema.Schema {
 			Required: true,
 			ForceNew: true,
 		},
+		"worker_type": {
+			Type:     schema.TypeString,
+			Computed: true,
+			ForceNew: true,
+		},
 	}
 }

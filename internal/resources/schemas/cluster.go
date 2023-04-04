@@ -29,12 +29,27 @@ func Cluster() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Required: true,
 		},
-		"k8s_version": {
+		"kubernetes_version": {
 			Type:     schema.TypeString,
+			Optional: true,
 			Computed: true,
 		},
 		"cluster_provider": {
 			Type:     schema.TypeString,
+			Computed: true,
+		},
+		"default_machine_sets": {
+			Type: schema.TypeList,
+			Elem: &schema.Resource{
+				Schema: MachineSets(),
+			},
+			Computed: true,
+		},
+		"default_machine_sets_detail": {
+			Type: schema.TypeList,
+			Elem: &schema.Resource{
+				Schema: MachineSetsDetail(),
+			},
 			Computed: true,
 		},
 		"machine_sets": {
@@ -86,6 +101,34 @@ func Cluster() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
+		"worker_nodes": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"name": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"machine_blueprint_id": {
+						Type:     schema.TypeString,
+						Required: true,
+					},
+					"count": {
+						Type:     schema.TypeFloat,
+						Required: true,
+					},
+					"os_version": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+					"os_image": {
+						Type:     schema.TypeString,
+						Optional: true,
+					},
+				},
+			},
+		},
 	}
 }
 
@@ -119,7 +162,7 @@ func DataCluster() map[string]*schema.Schema {
 			Type:     schema.TypeString,
 			Computed: true,
 		},
-		"k8s_version": {
+		"kubernetes_version": {
 			Type:     schema.TypeString,
 			Computed: true,
 		},

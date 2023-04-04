@@ -1,8 +1,8 @@
-# hpegl-caas-terraform-resources
+# hpegl-containers-terraform-resources
 
 - [hpegl-containers-terraform-resources](#hpegl-containers-terraform-resources)
     * [Introduction](#introduction)
-    * [Terraform versions](#terraform-versions)
+    * [Terraform version](#terraform-version)
     * [Terraform provider & v2.0 SDK](#terraform-provider--v20-sdk)
     * [Basic structure](#basic-structure)
     * [internal](#internal)
@@ -15,18 +15,18 @@
         + [Using the service-specific provider](#using-the-service-specific-provider)
         + [IAM token generation](#iam-token-generation)
             - [API-vended Service Client](#api-vended-service-client)
-            - [HPE Service Client](#hpe-service-client)
     * [To Build and Test the Terraform Provider](#to-build-and-test-the-terraform-provider)
+    * [Integration with HPE terraform-provider-hpegl](#integration-with-hpe-terraform-provider-hpegl)
 
 ## Introduction
 
-This repo contains Containers terraform provider code that we've used while developing
-the hpegl provider (https://github.com/HewlettPackard/terraform-provider-hpegl).  It is
+This repo contains CaaS terraform provider code that we've used while developing
+the hpegl provider (https://github.com/HPE/terraform-provider-hpegl).  It is
 the exemplar service provider repo, and will form the basis of a Github template.
 
 ## Terraform version
 
-This code has been tested against Terraform version v1.1.0
+This code has been tested against Terraform version v1.1.9
 
 ## Terraform provider & v2.0 SDK
 
@@ -47,9 +47,7 @@ The repo follows golang standards:
 ├── cmd
 │   └── terraform-provider-hpegl
 ├── examples
-│   ├── cluster-create
 │   ├── resources
-│   └── variables.tf
 ├── golangci-lint-config.yaml
 ├── go.mod
 ├── go.sum
@@ -57,7 +55,6 @@ The repo follows golang standards:
 ├── internal
 │   ├── acceptance_test
 │   ├── resources
-│   └── test-utils
 ├── main.go
 ├── Makefile
 ├── pkg
@@ -65,6 +62,8 @@ The repo follows golang standards:
 │   ├── client
 │   ├── constants
 │   └── resources
+│   └── test-utils
+│   └── utils
 ├── prod.yaml
 ├── README.md
 ├── templates
@@ -83,7 +82,7 @@ The internal directory contains:
     for acceptance tests.
   
 
-### internal/acceptance_test
+### acceptance_test
 
 There are two basic types of [terraform test](https://www.terraform.io/docs/extend/testing/index.html):
 * [Unit tests](https://www.terraform.io/docs/extend/testing/unit-testing.html): <br>
@@ -96,17 +95,10 @@ There are two basic types of [terraform test](https://www.terraform.io/docs/exte
   These tests are the primary method of ensuring that Terraform providers work as advertised. 
   Acceptance tests need to be developed for each service that is added to the GreenLake provider.
   Acceptance tests can be run from this service provider repo using the plugin.ProviderFunc object
-  returned from test-utils. Moreover the intention is that we will be able to copy acceptance tests
-  verbatim (or with minimal changes to test set-up) from the service repos to hpegl.  See
-  [here](https://github.com/hpe-hcss/terraform-provider-hpegl/tree/main/internal/acceptance/bmaas)
-  for acceptance tests for bmaas/Quake.  Note that these bmaas acceptance tests require a working Quake
-  portal to run against.  Also note that these bmaas acceptance tests were copied from the standalone
-  Quake provider repo. <br><br>
+  returned from test-utils.<br><br>
   Some information on writing acceptance tests can be found
   [here](https://www.terraform.io/docs/extend/testing/acceptance-tests/testcase.html)
 
-  This repo implements the acceptance framework. More info on this framework can be found [here](https://github.com/hpe-hcss/terraform-provider-hpegl/blob/main/developer/HPEGL_developer_details.md#acceptance-test-framework)
-  
 An example of how to use test-utils.ProviderFunc() to populate a test provider map required by acceptance
 tests is contained in provider_test.go
 
@@ -118,7 +110,7 @@ To run acceptance tests:
 $ make acceptance
 ```
 
-### internal/resources
+### resources
 
 This repo contains CaaS provider code to create and destroy a CaaS cluster, along with some stub cluster-blueprint
 CRUD code.  This code is ultimately executed by the hpegl terraform provider.  Note that we are using
@@ -157,7 +149,7 @@ the meta map and to execute it.
 The bulk of service-team development will occur in this directory.  Please ensure that as resource and data-source
 terraform objects are created that they are added to pkg/resources/registration.go
 
-### internal/test-utils
+### test-utils
 
 The code in this directory should not need to be changed outside of imports.  It constructs a terraform plugin.ProviderFunc object
 that is used to create a "dummy" service-specific terraform provider called hpegl that can be used for
@@ -184,52 +176,23 @@ when using the service-specific provider in hcl for provider development or in a
 ### Building the service-specific provider
 
 To build the provider type "make install".  This will build the provider binary and also place it
-in a .local directory that is compatible with terraform versions >= v0.13.  It is important to note
-that the name of the service under development should be included in the .local directory path.  Note the
-following section at the head of the Makefile:
-
-```makefile
-NAME=$(shell find cmd -name "main.go" -exec dirname {} \; | sort -u | sed -e 's|cmd/||')
-VERSION=0.0.1
-DUMMY_PROVIDER=caas
-LOCAL_LOCATION=~/.local/share/terraform/plugins/terraform.example.com/$(DUMMY_PROVIDER)/hpegl/$(VERSION)/linux_amd64/
-```
-
-The value of DUMMY_PROVIDER must be changed to something specific to the service under development, we suggest
-that the value contains the service mnemonic.
-
-See below for how to use this service-specific provider in development.
+in a .local directory that is compatible with terraform versions >= v0.13.
 
 ### Using the service-specific provider
 
-The service specific provider will be exposed to terraform under the name "hpegl".  We need to make sure
-that terraform will use the provider stored in the DUMMY_PROVIDER location specified in the Makefile.
-To do this note main.tf in examples, in particular the terraform stanza:
+The service specific provider will be exposed to terraform under the name "hpegl".
 
 ```hcl
 # Set-up for terraform >= v0.13
 terraform {
   required_providers {
     hpegl = {
-      # We are specifying a location that is specific to the service under development
-      # In this example it is caas (see "source" below).  The service-specific replacement
-      # to caas must be specified in "source" below and also in the Makefile as the
-      # value of DUMMY_PROVIDER.
       source  = "terraform.example.com/caas/hpegl"
       version = ">= 0.0.1"
     }
   }
 }
 ```
-
-Note the value of "source" under hpegl.  It needs to be of the form:
-```bash
-"terraform.example.com/$(DUMMY_PROVIDER)/hpegl"
-```
-where $(DUMMY_PROVIDER) is replaced by the value of DUMMY_PROVIDER from the Makefile.  With this
-"source" terraform will use the service-specific provider that was generated by "make install".
-The "hpegl" provider stanza can be provided and service resources and data-sources can be referred to by
-the keys specified in pkg/resources in hcl (i.e. .tf) files for development and testing purposes.
 
 ### IAM token generation
 
@@ -253,15 +216,6 @@ export HPEGL_USER_SECRET=< service client secret >
 export HPEGL_IAM_SERVICE_URL=< the "issuer" URL for the service client  >
 ```
 
-#### HPE Service Client
-
-```bash
-export HPEGL_TENANT_ID=< tenant-id >
-export HPEGL_USER_ID=< service client id >
-export HPEGL_USER_SECRET=< service client secret >
-export HPEGL_IAM_SERVICE_URL=< GL iam service url, defaults to https://client.greenlake.hpe.com/api/iam >
-export HPEGL_API_VENDED_SERVICE_CLIENT=false
-```
 ## To Build and Test the Terraform Provider
 
 Pre-requisites:
@@ -270,12 +224,6 @@ Pre-requisites:
 * The go programming language package
 * Terraform (Version: v1.1.0)
 
-Build the Terraform Provider binary:
-
-```bash
-$ cd hpegl-containers-terraform-resources
-$ make build
-```
 
 Install the Terraform Provider binary to the local env:
 
@@ -290,6 +238,7 @@ export HPEGL_TENANT_ID=<tenant-id>
 export HPEGL_USER_ID=<service client id>
 export HPEGL_USER_SECRET=<service client secret>
 export HPEGL_IAM_SERVICE_URL=<the "issuer" URL for the service client >
+export TF_VAR_HPEGL_SPACE=<space-id>
 ```
 
 To initialize the terraform:
@@ -301,14 +250,9 @@ $ terraform init
 
 Note: Ensure there is no .terraform.lock.hcl or .terraform in examples/cluster-create before running terraform init. If this file/folder is present, manually delete it beform initializing the terraform. 
 
-Update examples/resources/hpegl_caas_cluster/resource.tf with values for
+Update examples/resources/hpegl_caas_cluster/resource.tf with all the the necessary values
 
-```bash
-cluster name
-cluster blueprint name
-site name
-space id
-```
+
 To create the terraform plan:
 
 ```bash
@@ -327,5 +271,10 @@ To delete the cluster:
 ```bash
 terraform destroy
 ```
+
+## Integration with HPE terraform-provider-hpegl
+
+On every release in this repository, a PR is raised in [terraform-provider-hpegl](https://github.com/HPE/terraform-provider-hpegl) by dependabot, as per the changes in the release. The GL Team then reviews and merges the PR and goes forward with their release process. They will handle publishing a new version of the terraform-provider-hpegl. The latest version will then be available in the official Terraform [registry](https://registry.terraform.io/providers/HPE/hpegl/0.3.1).
+
 
 

@@ -83,12 +83,26 @@ coverage: vendor
 acceptance:
 	TF_ACC_CONFIG_PATH=$(shell pwd)	\
 	TF_ACC_CONFIG=prod \
-	TF_ACC=true go test -v -timeout=2700s -cover ./...
+	TF_ACC=true go test -v -timeout=18000s -cover ./... 2>&1 | tee result.txt;
+	@if grep "FAIL" result.txt; then\
+		echo "Tests Failed";\
+		rm -r result.txt;\
+		exit 1;\
+	fi
+	@echo "Tests Passed";
+	rm -r result.txt
 
 acceptance-short:
 	TF_ACC_CONFIG_PATH=$(shell pwd)	\
 	TF_ACC_CONFIG=prod \
-	TF_ACC=true go test -v -timeout=120s -short -cover ./...
+	TF_ACC=true go test -v -timeout=120s -short -cover ./... 2>&1 | tee result.txt;
+	@if grep "FAIL" result.txt; then\
+		echo "Tests Failed";\
+		rm -r result.txt;\
+		exit 1;\
+	fi
+	@echo "Tests Passed";
+	rm -r result.txt
 
 build: vendor $(NAME)
 .PHONY: build

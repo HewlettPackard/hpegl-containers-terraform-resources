@@ -45,7 +45,7 @@ func dataSourceClusterProviderReadContext(ctx context.Context, d *schema.Resourc
 
 	applianceID := d.Get("site_id").(string)
 
-	clusterProviders, resp, err := c.CaasClient.ClusterAdminApi.V1AppliancesIdClusterprovidersGet(clientCtx, applianceID)
+	clusterProviders, resp, err := c.CaasClient.ClusterProvidersApi.V1AppliancesIdClusterprovidersGet(clientCtx, applianceID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -133,7 +133,7 @@ func writeClusterProviderValues(d *schema.ResourceData, clusterProvider *mcaasap
 		return err
 	}
 
-	if err = d.Set("k8s_versions", clusterProvider.K8sVersions); err != nil {
+	if err = d.Set("kubernetes_versions", clusterProvider.KubernetesVersions); err != nil {
 		return err
 	}
 	return err

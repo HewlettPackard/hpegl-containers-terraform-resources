@@ -21,13 +21,15 @@ import (
 const (
 	// Fill in these values based on the environment being used for acceptance testing
 	name                = "test-cluster-bp"
-	defaultStorageClass = "gl-sbc-glhcnimblestor"
+	defaultStorageClass = "gl-sbc-glhc-nimblestor"
 	clusterProvider     = "ecp"
 	cpCount             = "1"
 	workerName          = "worker1"
 	workerCount         = "1"
-	cbspaceID           = "8d5dfbc0-f996-4e45-ab34-e719588a96ca"
-	k8sVersion          = "v1.20.11.hpe-2"
+	kubernetesVersion   = "1.23.13-hpe2"
+	apiURLCbp           = "https://mcaas.intg.hpedevops.net/mcaas"
+	siteNameCBp         = "FTC"
+	//apiURLCbp           = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 )
 
 // nolint: gosec
@@ -37,48 +39,47 @@ func testCaasClusterBlueprint() string {
 	return fmt.Sprintf(`
 	provider hpegl {
 		caas {
-			api_url = "https://mcaas.us1.greenlake-hpe.com/mcaas"
+			api_url = "%s"
 		}
 	}
+
+	variable "HPEGL_SPACE" {
+  		type = string
+	}
 	data "hpegl_caas_site" "site" {
-		name = "Austin"
-		space_id = "%s"
+		name = "%s"
+		space_id = var.HPEGL_SPACE
 	}
-    
     data "hpegl_caas_machine_blueprint" "mbcontrolplane" {
-  		name = "standard-master"
+  		name = "large-master"
   		site_id = data.hpegl_caas_site.site.id
 	}
-
 	data "hpegl_caas_machine_blueprint" "mbworker" {
-  		name = "standard-worker"
+  		name = "xlarge-worker"
   		site_id = data.hpegl_caas_site.site.id
 	}
-
 	resource hpegl_caas_cluster_blueprint testcb {
 		name         = "%s%d"
-		k8s_version  = "%s"
+		kubernetes_version  = "%s"
   		default_storage_class = "%s"
   		site_id = data.hpegl_caas_site.site.id
   		cluster_provider = "%s"
-		control_plane_nodes = {
-    		machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbcontrolplane.id
-			count = "%s"
-  		}
+		control_plane_count = "%s"
   		worker_nodes {
 			name = "%s"
       		machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
       		count = "%s"
     	}
-	}`, cbspaceID, name, r.Int63n(99999999), k8sVersion, defaultStorageClass, clusterProvider, cpCount, workerName, workerCount)
+	}`, apiURLCbp, siteNameCBp, name, r.Int63n(99999999), kubernetesVersion, defaultStorageClass, clusterProvider, cpCount, workerName, workerCount)
 }
 
 func TestCaasClusterBlueprintCreate(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: resource.ComposeTestCheckFunc(testCaasClusterBlueprintDestroy("hpegl_caas_cluster_blueprint.testcb")),
+		PreCheck:                  func() { testAccPreCheck(t) },
+		Providers:                 testAccProviders,
+		PreventPostDestroyRefresh: true,
+		CheckDestroy:              resource.ComposeTestCheckFunc(testCaasClusterBlueprintDestroy("hpegl_caas_cluster_blueprint.testcb")),
 		Steps: []resource.TestStep{
 			{
 				Config: testCaasClusterBlueprint(),
@@ -136,7 +137,8 @@ func testCaasClusterBlueprintDestroy(name string) resource.TestCheckFunc {
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 
 		var clusterBlueprint *mcaasapi.ClusterBlueprint
-		clusterBlueprints, _, err := p.CaasClient.ClusterAdminApi.V1ClusterblueprintsGet(clientCtx, siteID)
+		field := "applianceID eq " + siteID
+		clusterBlueprints, _, err := p.CaasClient.ClusterBlueprintsApi.V1ClusterblueprintsGet(clientCtx, field, nil)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster blueprint list %w", err)
 		}

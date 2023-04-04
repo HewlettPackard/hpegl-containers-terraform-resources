@@ -23,12 +23,15 @@ const (
 	osImage         = "sles-custom"
 	osVersion       = "15"
 	computeType     = "General Purpose"
-	size            = "Large"
+	size            = "G1-CN-xLarge"
 	storageType     = "General Purpose"
-	spaceIDMbp      = "8d5dfbc0-f996-4e45-ab34-e719588a96ca"
+	apiURLMBp       = "https://mcaas.intg.hpedevops.net/mcaas"
+	siteNameMbp     = "FTC"
+	workerType      = "Virtual"
+	//apiURLMBp       = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 )
 
-var machineRoles = []string{"controlplane"}
+var machineRoles = []string{"worker"}
 
 // nolint: gosec
 func testCaasMachineBlueprint() string {
@@ -36,12 +39,15 @@ func testCaasMachineBlueprint() string {
 	return fmt.Sprintf(`
 	provider hpegl {
 		caas {
-			api_url = "https://mcaas.us1.greenlake-hpe.com/mcaas"
+			api_url = "%s"
 		}
 	}
+	variable "HPEGL_SPACE" {
+  		type = string
+	}
 	data "hpegl_caas_site" "blr" {
-		name = "Austin"
-		space_id = "%s"
+		name = "%s"
+		space_id = var.HPEGL_SPACE
 	  }
 	resource hpegl_caas_machine_blueprint testmb {
 		name         = "%s%d"
@@ -53,15 +59,17 @@ func testCaasMachineBlueprint() string {
 		compute_type = "%s"
 		size = "%s"
 		storage_type = "%s"
-	}`, spaceIDMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType)
+        worker_type = "%s"
+	}`, apiURLMBp, siteNameMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType, workerType)
 }
 
 func TestCaasMachineBlueprintCreate(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: resource.ComposeTestCheckFunc(testCaasMachineBlueprintDestroy("hpegl_caas_machine_blueprint.testmb")),
+		PreCheck:                  func() { testAccPreCheck(t) },
+		Providers:                 testAccProviders,
+		PreventPostDestroyRefresh: true,
+		CheckDestroy:              resource.ComposeTestCheckFunc(testCaasMachineBlueprintDestroy("hpegl_caas_machine_blueprint.testmb")),
 		Steps: []resource.TestStep{
 			{
 				Config: testCaasMachineBlueprint(),
@@ -119,7 +127,8 @@ func testCaasMachineBlueprintDestroy(name string) resource.TestCheckFunc {
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 
 		var machineBlueprint *mcaasapi.MachineBlueprint
-		machineBlueprints, _, err := p.CaasClient.ClusterAdminApi.V1MachineblueprintsGet(clientCtx, siteID)
+		field := "applianceID eq " + siteID
+		machineBlueprints, _, err := p.CaasClient.MachineBlueprintsApi.V1MachineblueprintsGet(clientCtx, field, nil)
 		if err != nil {
 			return fmt.Errorf("Error in getting machine blueprint list %w", err)
 		}

@@ -3,12 +3,8 @@
 terraform {
   required_providers {
     hpegl = {
-      # We are specifying a location that is specific to the service under development
-      # In this example it is caas (see "source" below).  The service-specific replacement
-      # to caas must be specified in "source" below and also in the Makefile as the
-      # value of DUMMY_PROVIDER.
-      source  = "terraform.example.com/caas/hpegl"
-      version = ">= 0.0.1"
+      source = "HPE/hpegl"
+      version = ">= 0.1.0"
     }
   }
 }
@@ -18,9 +14,13 @@ provider hpegl {
   }
 }
 
+variable "HPEGL_SPACE" {
+  type = string
+}
+
 data "hpegl_caas_site" "blr" {
   name = "BLR"
-  space_id = ""
+  space_id = var.HPEGL_SPACE
 }
 
 data "hpegl_caas_machine_blueprint" "mbcontrolplane" {
@@ -40,14 +40,11 @@ data "hpegl_caas_cluster_provider" "clusterprovider" {
 
 resource hpegl_caas_cluster_blueprint testbp {
   name         = "tf-cluster-bp"
-  k8s_version  = data.hpegl_caas_cluster_provider.clusterprovider.k8s_versions[0]
+  kubernetes_version  = data.hpegl_caas_cluster_provider.clusterprovider.kubernetes_versions[0]
   default_storage_class = ""
   site_id = data.hpegl_caas_site.blr.id
   cluster_provider = ""
-  control_plane_nodes = {
-    machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbcontrolplane.id
-    count = ""
-  }
+  control_plane_count = ""
   worker_nodes {
       name = ""
       machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id

@@ -3,7 +3,7 @@ package resources
 import (
 	"context"
 	"fmt"
-	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/utils"
+	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/utils"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -53,12 +53,14 @@ func machineBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 	machineRoles := d.Get("machine_roles")
 	machineRolesInt := machineRoles.([]interface{})
 
-	var machineRolesStr []string
+	var machineRolesStr []mcaasapi.MachineRolesType
 
 	for _, val := range machineRolesInt {
 		valStr := fmt.Sprint(val)
-		machineRolesStr = append(machineRolesStr, valStr)
+		machineRolesStr = append(machineRolesStr, mcaasapi.MachineRolesType(valStr))
 	}
+
+	workerType := mcaasapi.MachineWorkerType(d.Get("worker_type").(string))
 
 	createMachineBlueprint := mcaasapi.MachineBlueprint{
 
@@ -71,9 +73,10 @@ func machineBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 		ComputeInstanceType: d.Get("compute_type").(string),
 		Size:                d.Get("size").(string),
 		StorageInstanceType: d.Get("storage_type").(string),
+		WorkerType:          &workerType,
 	}
 
-	machineBlueprint, resp, err := c.CaasClient.ClusterAdminApi.V1MachineblueprintsPost(clientCtx, createMachineBlueprint)
+	machineBlueprint, resp, err := c.CaasClient.MachineBlueprintsApi.V1MachineblueprintsPost(clientCtx, createMachineBlueprint)
 	if err != nil {
 		errMessage := utils.GetErrorMessage(err, resp.StatusCode)
 		diags = append(diags, diag.Errorf("Error in MachineBlueprintsPost: %s - %s", err, errMessage)...)
@@ -101,8 +104,8 @@ func machineBlueprintReadContext(ctx context.Context, d *schema.ResourceData, me
 	var diags diag.Diagnostics
 	id := d.Id()
 	applianceID := d.Get("site_id").(string)
-
-	machineBlueprint, resp, err := c.CaasClient.ClusterAdminApi.V1MachineblueprintsIdGet(clientCtx, id, applianceID)
+	field := "applianceID eq " + applianceID
+	machineBlueprint, resp, err := c.CaasClient.MachineBlueprintsApi.V1MachineblueprintsIdGet(clientCtx, id, field, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -177,6 +180,9 @@ func writeMachineBlueprintResourceValues(d *schema.ResourceData, machineBlueprin
 	if err = d.Set("site_id", machineBlueprint.ApplianceID); err != nil {
 		return err
 	}
+	if err = d.Set("worker_type", machineBlueprint.WorkerType); err != nil {
+		return err
+	}
 
 	return err
 }
@@ -197,7 +203,7 @@ func machineBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 	id := d.Id()
 
-	resp, err := c.CaasClient.ClusterAdminApi.V1MachineblueprintsIdDelete(clientCtx, id)
+	resp, err := c.CaasClient.MachineBlueprintsApi.V1MachineblueprintsIdDelete(clientCtx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}

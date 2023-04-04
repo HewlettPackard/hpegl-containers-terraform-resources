@@ -3,12 +3,8 @@
 terraform {
   required_providers {
     hpegl = {
-      # We are specifying a location that is specific to the service under development
-      # In this example it is caas (see "source" below).  The service-specific replacement
-      # to caas must be specified in "source" below and also in the Makefile as the
-      # value of DUMMY_PROVIDER.
-      source  = "terraform.example.com/caas/hpegl"
-      version = ">= 0.0.1"
+      source = "HPE/hpegl"
+      version = ">= 0.1.0"
     }
   }
 }
@@ -18,9 +14,13 @@ provider hpegl {
   }
 }
 
+variable "HPEGL_SPACE" {
+  type = string
+}
+
 data "hpegl_caas_site" "blr" {
   name = "BLR"
-  space_id = ""
+  space_id = var.HPEGL_SPACE
 }
 
 resource hpegl_caas_machine_blueprint test {
@@ -28,6 +28,7 @@ resource hpegl_caas_machine_blueprint test {
  site_id = data.hpegl_caas_site.blr.id
  machine_roles = ["controlplane"]
  machine_provider = "vmaas"
+ worker_type = ""
  os_image = "sles-custom"
  os_version = ""
  compute_type = ""

@@ -1,18 +1,17 @@
-// (C) Copyright 2020-2022 Hewlett Packard Enterprise Development LP
+// (C) Copyright 2020-2023 Hewlett Packard Enterprise Development LP
 
 package resources
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strconv"
-
+	"fmt"
 	"github.com/HewlettPackard/hpegl-containers-go-sdk/pkg/mcaasapi"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/resources/schemas"
-	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/utils"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/auth"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/client"
+	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/utils"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func ClusterBlueprint() *schema.Resource {
@@ -31,7 +30,7 @@ func ClusterBlueprint() *schema.Resource {
 		Timeouts:           nil,
 		Description: `The cluster blueprint resource facilitates the creation and
 			deletion of a CaaS cluster blueprint.  Update is currently not supported. The
-			required inputs when creating a cluster blueprint are name, k8s_version,
+			required inputs when creating a cluster blueprint are name, kubernetes_version,
 			site-id, cluster_provider, control_plane, worker_nodes and default_storage_class`,
 	}
 }
@@ -50,29 +49,26 @@ func clusterBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 	var machineSetsList []mcaasapi.MachineSet
 
-	controlPlaneMap := d.Get("control_plane_nodes").(map[string]interface{})
-	controlPlaneDetails := getControlPlaneNodeDetails(controlPlaneMap)
-	machineSetsList = append(machineSetsList, controlPlaneDetails)
-
 	workerNodesList := d.Get("worker_nodes").([]interface{})
 	for _, workerNode := range workerNodesList {
 		worker, ok := workerNode.(map[string]interface{})
 		if ok {
-			workerNodeDetails := getWorkerNodeDetails(worker)
+			workerNodeDetails := getWorkerNodeDetails(d, worker)
 			machineSetsList = append(machineSetsList, workerNodeDetails)
 		}
 	}
 
 	createClusterBlueprint := mcaasapi.ClusterBlueprint{
 		Name:                d.Get("name").(string),
-		K8sVersion:          d.Get("k8s_version").(string),
+		KubernetesVersion:   d.Get("kubernetes_version").(string),
 		DefaultStorageClass: d.Get("default_storage_class").(string),
 		ApplianceID:         d.Get("site_id").(string),
 		ClusterProvider:     d.Get("cluster_provider").(string),
+		ControlPlaneCount:   int32(d.Get("control_plane_count").(float64)),
 		MachineSets:         machineSetsList,
 	}
 
-	clusterBlueprint, resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsPost(clientCtx, createClusterBlueprint)
+	clusterBlueprint, resp, err := c.CaasClient.ClusterBlueprintsApi.V1ClusterblueprintsPost(clientCtx, createClusterBlueprint)
 	if err != nil {
 		errMessage := utils.GetErrorMessage(err, resp.StatusCode)
 		diags = append(diags, diag.Errorf("Error in ClustersBlueprintPost: %s - %s", err, errMessage)...)
@@ -124,7 +120,7 @@ func writeBlueprintResourceValues(d *schema.ResourceData, blueprint *mcaasapi.Cl
 		return err
 	}
 
-	if err = d.Set("k8s_version", blueprint.K8sVersion); err != nil {
+	if err = d.Set("kubernetes_version", blueprint.KubernetesVersion); err != nil {
 		return err
 	}
 
@@ -158,7 +154,7 @@ func clusterBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 	id := d.Id()
 
-	resp, err := c.CaasClient.ClusterAdminApi.V1ClusterblueprintsIdDelete(clientCtx, id)
+	resp, err := c.CaasClient.ClusterBlueprintsApi.V1ClusterblueprintsIdDelete(clientCtx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -169,22 +165,30 @@ func clusterBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, 
 	return diags
 }
 
-func getControlPlaneNodeDetails(controlPlaneNodes map[string]interface{}) mcaasapi.MachineSet {
-	c := controlPlaneNodes["count"].(string)
-	count, _ := strconv.ParseFloat(c, 64)
-	cp := mcaasapi.MachineSet{
-		Name:               "master",
-		MachineBlueprintId: controlPlaneNodes["machine_blueprint_id"].(string),
-		Count:              count,
-	}
-	return cp
-}
+func getWorkerNodeDetails(d *schema.ResourceData, workerNode map[string]interface{}) mcaasapi.MachineSet {
+	osImage := ""
+	osVersion := ""
+	machines, ok := d.GetOk("machine_sets")
 
-func getWorkerNodeDetails(workerNode map[string]interface{}) mcaasapi.MachineSet {
+	osVersion = fmt.Sprintf("%v", workerNode["os_version"])
+	osImage = fmt.Sprintf("%v", workerNode["os_image"])
+
+	if osVersion == "" && osImage == "" && ok {
+		machinesets := machines.([]interface{})
+		for _, machinesetInt := range machinesets {
+			machineset := machinesetInt.(map[string]interface{})
+			if workerNode["name"] == machineset["name"] {
+				osVersion = fmt.Sprintf("%v", machineset["os_version"])
+				osImage = fmt.Sprintf("%v", machineset["os_image"])
+			}
+		}
+	}
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: workerNode["machine_blueprint_id"].(string),
-		Count:              workerNode["count"].(float64),
+		Count:              int32(workerNode["count"].(float64)),
 		Name:               workerNode["name"].(string),
+		OsImage:            osImage,
+		OsVersion:          osVersion,
 	}
 	return wn
 }

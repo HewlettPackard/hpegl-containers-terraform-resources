@@ -10,7 +10,7 @@ import (
 
 	libUtils "github.com/hewlettpackard/hpegl-provider-lib/pkg/utils"
 
-	testutils "github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/test-utils"
+	testutils "github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/test-utils"
 )
 
 var (

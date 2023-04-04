@@ -1,10 +1,12 @@
-// (C) Copyright 2020-2021 Hewlett Packard Enterprise Development LP
+// (C) Copyright 2020-2023 Hewlett Packard Enterprise Development LP
 
 package resources
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -16,18 +18,21 @@ import (
 	"github.com/HewlettPackard/hpegl-containers-go-sdk/pkg/mcaasapi"
 
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/resources/schemas"
-	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/utils"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/auth"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/client"
+	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/utils"
 )
 
 const (
-	stateInitializing = "initializing"
-	stateProvisioning = "infra-provisioning"
-	stateCreating     = "creating"
-	stateDeleting     = "deleting"
-	stateReady        = "ready"
-	stateDeleted      = "deleted"
+	stateInitializing   = "initializing"
+	stateProvisioning   = "infra-provisioning"
+	stateDeProvisioning = "infra-deprovisioning"
+	stateCreating       = "creating"
+	stateDeleting       = "deleting"
+	stateReady          = "ready"
+	stateDeleted        = "deleted"
+	stateUpdating       = "updating"
+	stateUpgrading      = "upgrading"
 
 	stateRetrying = "retrying" // placeholder state used to allow retrying after errors
 
@@ -53,23 +58,22 @@ func Cluster() *schema.Resource {
 		CreateContext:  clusterCreateContext,
 		ReadContext:    clusterReadContext,
 		UpdateContext:  clusterUpdateContext,
-		// TODO figure out if a cluster can be updated
-		// Update:             clusterUpdate,
-		DeleteContext: clusterDeleteContext,
-		CustomizeDiff: nil,
+		DeleteContext:  clusterDeleteContext,
+		CustomizeDiff:  nil,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		DeprecationMessage: "",
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(clusterAvailableTimeout),
-			// Update: schema.DefaultTimeout(clusterAvailableTimeout),
+			Update: schema.DefaultTimeout(clusterAvailableTimeout),
 			Delete: schema.DefaultTimeout(clusterDeleteTimeout),
 		},
-		Description: `The cluster resource facilitates the creation and
-			deletion of a CaaS cluster.  Update is currently not supported.  There
-			are four required inputs when creating a cluster - name, blueprint-id,
-			site-id and space-id`,
+		Description: `The cluster resource facilitates the creation, updation and
+			deletion of a CaaS cluster. There are four required inputs when 
+			creating a cluster - name, blueprint_id, site_id and space_id. 
+			worker_nodes is an optional input to scale nodes on cluster.
+            OS Image update & Kubernetes version upgrade are also supported while updating the cluster.`,
 	}
 }
 
@@ -95,7 +99,7 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		SpaceID:            spaceID,
 	}
 
-	cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersPost(clientCtx, createCluster)
+	cluster, resp, err := c.CaasClient.ClustersApi.V1ClustersPost(clientCtx, createCluster)
 	if err != nil {
 		errMessage := utils.GetErrorMessage(err, resp.StatusCode)
 		diags = append(diags, diag.Errorf("Error in ClustersPost: %s - %s", err, errMessage)...)
@@ -108,7 +112,7 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		Delay:      0,
 		Pending:    []string{stateInitializing, stateProvisioning, stateCreating, stateRetrying},
 		Target:     []string{stateReady},
-		Timeout:    clusterAvailableTimeout,
+		Timeout:    d.Timeout("create"),
 		MinTimeout: pollingInterval,
 		Refresh:    clusterRefresh(ctx, d, cluster.Id, spaceID, stateReady, meta),
 	}
@@ -120,6 +124,84 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 
 	// Only set id to non-empty string if resource has been successfully created
 	d.SetId(cluster.Id)
+
+	// Set default master and worker nodes
+	defaultFlattenMachineSets := schemas.FlattenMachineSets(&cluster.MachineSets)
+	if err = d.Set("default_machine_sets", defaultFlattenMachineSets); err != nil {
+		return diag.FromErr(err)
+	}
+
+	// Set default master and worker nodes details
+	defaultFlattenMachineSetsDetail := schemas.FlattenMachineSetsDetail(&cluster.MachineSetsDetail)
+	if err = d.Set("default_machine_sets_detail", defaultFlattenMachineSetsDetail); err != nil {
+		return diag.FromErr(err)
+	}
+
+	//Add additional worker node pool after cluster creation
+	workerNodes, workerNodePresent := d.GetOk("worker_nodes")
+	newK8sVersionInterface, k8sVersionPresent := d.GetOk("kubernetesVersion")
+	if workerNodePresent || k8sVersionPresent {
+		workerNodesList := workerNodes.([]interface{})
+		machineSets := []mcaasapi.MachineSet{}
+
+		for _, workerNode := range workerNodesList {
+			machineSets = append(machineSets, getWorkerNodeDetails(d, workerNode.(map[string]interface{})))
+		}
+
+		defaultMachineSets := cluster.MachineSets
+		defaultWorkersName, err := GetDefaultWorkersName(d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		//Remove default worker node if its declared in worker nodes
+		for _, defaultWorkerName := range defaultWorkersName {
+			if utils.WorkerPresentInMachineSets(machineSets, defaultWorkerName) {
+				defaultMachineSets = utils.RemoveWorkerFromMachineSets(defaultMachineSets, defaultWorkerName)
+			}
+		}
+
+		machineSets = append(defaultMachineSets, machineSets...)
+		temp, err := json.Marshal(machineSets)
+		if err != nil {
+			return diag.Errorf("Error in parsing machinesets response %s", err)
+		}
+		var finalMachineSets []mcaasapi.AllOfUpdateClusterMachineSetsItems
+		_ = json.Unmarshal(temp, &finalMachineSets)
+
+		//Check if kubernetesVersion update is present
+		newK8sVersion := ""
+		if k8sVersionPresent {
+			newK8sVersion = fmt.Sprintf("%v", newK8sVersionInterface)
+		}
+
+		updateCluster := mcaasapi.UpdateCluster{
+			MachineSets:       finalMachineSets,
+			KubernetesVersion: newK8sVersion,
+		}
+
+		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
+		cluster, resp, err := c.CaasClient.ClustersApi.V1ClustersIdPut(clientCtx, updateCluster, cluster.Id)
+		if err != nil {
+			errMessage := utils.GetErrorMessage(err, resp.StatusCode)
+			diags = append(diags, diag.Errorf("Error in V1ClustersIdPut: %s - %s", err, errMessage)...)
+			return diags
+		}
+		defer resp.Body.Close()
+
+		createStateConf := resource.StateChangeConf{
+			Delay:      0,
+			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating, stateDeProvisioning, stateUpgrading},
+			Target:     []string{stateReady},
+			Timeout:    d.Timeout("create"),
+			MinTimeout: pollingInterval,
+			Refresh:    clusterRefresh(ctx, d, cluster.Id, spaceID, stateReady, meta),
+		}
+
+		_, err = createStateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
 
 	// TODO Should we be passing clientCtx here?
 	return clusterReadContext(ctx, d, meta)
@@ -158,8 +240,8 @@ func clusterReadContext(ctx context.Context, d *schema.ResourceData, meta interf
 	var diags diag.Diagnostics
 	id := d.Id()
 	spaceID := d.Get("space_id").(string)
-
-	cluster, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersIdGet(clientCtx, id, spaceID)
+	field := "spaceID eq " + spaceID
+	cluster, resp, err := c.CaasClient.ClustersApi.V1ClustersIdGet(clientCtx, id, field, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -169,7 +251,7 @@ func clusterReadContext(ctx context.Context, d *schema.ResourceData, meta interf
 		return diag.FromErr(err)
 	}
 
-	kubeconfig, _, err := c.CaasClient.ClusterAdminApi.V1ClustersIdKubeconfigGet(clientCtx, id)
+	kubeconfig, _, err := c.CaasClient.KubeConfigApi.V1ClustersIdKubeconfigGet(clientCtx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -218,7 +300,7 @@ func writeClusterResourceValues(d *schema.ResourceData, cluster *mcaasapi.Cluste
 		return err
 	}
 
-	if err = d.Set("k8s_version", cluster.K8sVersion); err != nil {
+	if err = d.Set("kubernetes_version", cluster.KubernetesVersion); err != nil {
 		return err
 	}
 
@@ -283,7 +365,7 @@ func clusterDeleteContext(ctx context.Context, d *schema.ResourceData, meta inte
 	id := d.Id()
 	spaceID := d.Get("space_id").(string)
 
-	_, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersIdDelete(clientCtx, id)
+	resp, err := c.CaasClient.ClustersApi.V1ClustersIdDelete(clientCtx, id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -293,7 +375,7 @@ func clusterDeleteContext(ctx context.Context, d *schema.ResourceData, meta inte
 		Delay:      pollingInterval,
 		Pending:    []string{stateDeleting, stateRetrying},
 		Target:     []string{stateDeleted},
-		Timeout:    clusterDeleteTimeout,
+		Timeout:    d.Timeout("delete"),
 		MinTimeout: pollingInterval,
 		Refresh:    clusterRefresh(ctx, d, id, spaceID, stateDeleted, meta),
 	}
@@ -332,8 +414,8 @@ func createGetTokenFunc(
 			return "", err
 		}
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
-
-		clusters, resp, err := c.CaasClient.ClusterAdminApi.V1ClustersGet(clientCtx, spaceID)
+		field := "spaceID eq " + spaceID
+		clusters, resp, err := c.CaasClient.ClustersApi.V1ClustersGet(clientCtx, field, nil)
 		if err != nil {
 			if resp != nil {
 				// Check err response code to see if we need to retry
@@ -413,6 +495,171 @@ func isErrRetryable(err error) bool {
 }
 
 func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	c, err := client.GetClientFromMetaMap(meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	token, err := auth.GetToken(ctx, meta)
+	if err != nil {
+		return diag.Errorf("Error in getting token in cluster-create: %s", err)
+	}
+
+	clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 	var diags diag.Diagnostics
-	return diags
+	newK8sVersionInterface, k8sVersionPresent := d.GetOk("kubernetes_version")
+
+	if d.HasChange("worker_nodes") || k8sVersionPresent {
+		machineSets := []mcaasapi.MachineSet{}
+
+		workerNodes := d.Get("worker_nodes").([]interface{})
+		for _, workerNode := range workerNodes {
+			machineSets = append(machineSets, getWorkerNodeDetails(d, workerNode.(map[string]interface{})))
+		}
+
+		defaultMachineSetsInterface := d.Get("default_machine_sets").([]interface{})
+		defaultMachineSets := []mcaasapi.MachineSet{}
+
+		for _, dms := range defaultMachineSetsInterface {
+			defaultMachineSet := getDefaultMachineSet(d, dms.(map[string]interface{}))
+			defaultMachineSets = append(defaultMachineSets, defaultMachineSet)
+		}
+		defaultWorkersName, err := GetDefaultWorkersName(d)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		for _, defaultWorkerName := range defaultWorkersName {
+			if utils.WorkerPresentInMachineSets(machineSets, defaultWorkerName) {
+				defaultMachineSets = utils.RemoveWorkerFromMachineSets(defaultMachineSets, defaultWorkerName)
+			}
+		}
+		machineSets = append(machineSets, defaultMachineSets...)
+		temp, err := json.Marshal(machineSets)
+		if err != nil {
+			return diag.Errorf("Error in parsing machinesets response %s", err)
+		}
+		var finalMachineSets []mcaasapi.AllOfUpdateClusterMachineSetsItems
+		_ = json.Unmarshal(temp, &finalMachineSets)
+		//Check if kubernetesVersion update is present
+		newK8sVersion := ""
+		if k8sVersionPresent {
+			newK8sVersion = fmt.Sprintf("%v", newK8sVersionInterface)
+		}
+
+		updateCluster := mcaasapi.UpdateCluster{
+			MachineSets:       finalMachineSets,
+			KubernetesVersion: newK8sVersion,
+		}
+		clusterID := d.Id()
+		cluster, resp, err := c.CaasClient.ClustersApi.V1ClustersIdPut(clientCtx, updateCluster, clusterID)
+		if err != nil {
+			errMessage := utils.GetErrorMessage(err, resp.StatusCode)
+			diags = append(diags, diag.Errorf("Error in V1ClustersIdPut: %s - %s", err, errMessage)...)
+			return diags
+		}
+		defer resp.Body.Close()
+
+		spaceID := d.Get("space_id").(string)
+		createStateConf := resource.StateChangeConf{
+			Delay:      0,
+			Pending:    []string{stateProvisioning, stateCreating, stateRetrying, stateUpdating, stateDeProvisioning, stateUpgrading},
+			Target:     []string{stateReady},
+			Timeout:    d.Timeout("create"),
+			MinTimeout: pollingInterval,
+			Refresh:    clusterRefresh(ctx, d, cluster.Id, spaceID, stateReady, meta),
+		}
+
+		_, err = createStateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	return clusterReadContext(ctx, d, meta)
+}
+
+func getDefaultMachineSet(d *schema.ResourceData, defaultMachineSet map[string]interface{}) mcaasapi.MachineSet {
+	//Use the updated os Image version in the update request body so that at the time of scale up/down, the update request body has the latest os image version.
+	osVersion := ""
+	osImage := ""
+	dwns, _ := GetDefaultWorkersName(d)
+	var found bool
+	for _, dwn := range dwns {
+		if defaultMachineSet["name"].(string) == dwn {
+			found = true
+			break
+		}
+	}
+	if found {
+		for _, dwn := range dwns {
+			if defaultMachineSet["name"].(string) == dwn {
+				machinesets := d.Get("machine_sets").([]interface{})
+				for _, machinesetInt := range machinesets {
+					machineset := machinesetInt.(map[string]interface{})
+					if dwn == machineset["name"] {
+						osVersion = fmt.Sprintf("%v", machineset["os_version"])
+						osImage = fmt.Sprintf("%v", machineset["os_image"])
+					}
+				}
+			}
+		}
+
+	} else {
+		osVersion = defaultMachineSet["os_version"].(string)
+		osImage = defaultMachineSet["os_image"].(string)
+
+	}
+	wn := mcaasapi.MachineSet{
+		MachineBlueprintId: defaultMachineSet["machine_blueprint_id"].(string),
+		Count:              int32(defaultMachineSet["count"].(float64)),
+		Name:               defaultMachineSet["name"].(string),
+		OsImage:            osImage,
+		OsVersion:          osVersion,
+	}
+	return wn
+}
+func getDefaultMachineSetDetail(defaultMachineSetDetail map[string]interface{}) mcaasapi.MachineSetDetail {
+	mr := defaultMachineSetDetail["machine_roles"].([]interface{})
+	MachineRoles := make([]mcaasapi.MachineRolesType, 0, len(mr))
+	for _, v := range mr {
+		MachineRoles = append(MachineRoles, mcaasapi.MachineRolesType(v.(string)))
+	}
+
+	wnd := mcaasapi.MachineSetDetail{
+		Name:                defaultMachineSetDetail["name"].(string),
+		OsImage:             defaultMachineSetDetail["os_image"].(string),
+		OsVersion:           defaultMachineSetDetail["os_version"].(string),
+		Count:               int32(defaultMachineSetDetail["count"].(float64)),
+		MachineRoles:        MachineRoles,
+		MachineProvider:     defaultMachineSetDetail["machine_provider"].(string),
+		Size:                defaultMachineSetDetail["size"].(string),
+		ComputeInstanceType: defaultMachineSetDetail["compute_type"].(string),
+		StorageInstanceType: defaultMachineSetDetail["storage_type"].(string),
+	}
+	return wnd
+}
+
+func GetDefaultWorkersName(d *schema.ResourceData) ([]string, error) {
+
+	defaultMachineSetsDetailInterface := d.Get("default_machine_sets_detail").([]interface{})
+	defaultMachineSetsDetail := []mcaasapi.MachineSetDetail{}
+
+	for _, dmsd := range defaultMachineSetsDetailInterface {
+		defaultMachineSetDetail := getDefaultMachineSetDetail(dmsd.(map[string]interface{}))
+		defaultMachineSetsDetail = append(defaultMachineSetsDetail, defaultMachineSetDetail)
+	}
+
+	var workerNames []string
+
+	for _, msd := range defaultMachineSetsDetail {
+		for _, role := range msd.MachineRoles {
+			if role == "worker" {
+				workerNames = append(workerNames, msd.Name)
+			}
+		}
+	}
+	if len(workerNames) == 0 {
+		return nil, fmt.Errorf("Worker node not present in the cluster")
+	}
+	return workerNames, nil
 }

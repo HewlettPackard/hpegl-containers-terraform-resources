@@ -1,10 +1,9 @@
 # Copyright 2022 Hewlett Packard Enterprise Development LP
-name: GitHub Actions CI
+name: Trivy Scan
 
 on: [push, pull_request]
 jobs:
   ci:
-    name: Trivy Scan
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout code
