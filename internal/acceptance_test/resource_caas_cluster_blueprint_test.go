@@ -27,8 +27,8 @@ const (
 	workerName          = "worker1"
 	workerCount         = "1"
 	//kubernetesVersion   = "1.24.10-hpe1"
-	apiURLCbp           = "https://mcaas.intg.hpedevops.net/mcaas"
-	siteNameCBp         = "FTC"
+	apiURLCbp   = "https://mcaas.intg.hpedevops.net/mcaas"
+	siteNameCBp = "FTC"
 	//apiURLCbp           = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 )
 
