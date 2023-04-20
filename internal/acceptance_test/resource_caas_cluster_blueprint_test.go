@@ -64,7 +64,7 @@ func testCaasClusterBlueprint() string {
     }
 	resource hpegl_caas_cluster_blueprint testcb {
 		name         = "%s%d"
-		kubernetes_version  = data.hpegl_caas_cluster_provider.clusterprovider.kubernetes_version[0]
+		kubernetes_version  = data.hpegl_caas_cluster_provider.clusterprovider.kubernetes_versions[0]
   		default_storage_class = "%s"
   		site_id = data.hpegl_caas_site.site.id
   		cluster_provider = "%s"
