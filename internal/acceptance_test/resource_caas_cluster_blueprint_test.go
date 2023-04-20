@@ -26,7 +26,7 @@ const (
 	cpCount             = "1"
 	workerName          = "worker1"
 	workerCount         = "1"
-	kubernetesVersion   = "1.23.13-hpe2"
+	//kubernetesVersion   = "1.24.10-hpe1"
 	apiURLCbp           = "https://mcaas.intg.hpedevops.net/mcaas"
 	siteNameCBp         = "FTC"
 	//apiURLCbp           = "https://mcaas.us1.greenlake-hpe.com/mcaas"
@@ -58,9 +58,13 @@ func testCaasClusterBlueprint() string {
   		name = "xlarge-worker"
   		site_id = data.hpegl_caas_site.site.id
 	}
+    data "hpegl_caas_cluster_provider" "clusterprovider" {
+        name = "ecp"
+        site_id = data.hpegl_caas_site.blr.id
+    }
 	resource hpegl_caas_cluster_blueprint testcb {
 		name         = "%s%d"
-		kubernetes_version  = "%s"
+		kubernetes_version  = data.hpegl_caas_cluster_provider.clusterprovider.kubernetes_version[0]
   		default_storage_class = "%s"
   		site_id = data.hpegl_caas_site.site.id
   		cluster_provider = "%s"
@@ -70,7 +74,7 @@ func testCaasClusterBlueprint() string {
       		machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
       		count = "%s"
     	}
-	}`, apiURLCbp, siteNameCBp, name, r.Int63n(99999999), kubernetesVersion, defaultStorageClass, clusterProvider, cpCount, workerName, workerCount)
+	}`, apiURLCbp, siteNameCBp, name, r.Int63n(99999999), defaultStorageClass, clusterProvider, cpCount, workerName, workerCount)
 }
 
 func TestCaasClusterBlueprintCreate(t *testing.T) {
