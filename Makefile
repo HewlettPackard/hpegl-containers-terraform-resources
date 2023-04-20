@@ -80,7 +80,7 @@ coverage: vendor
 	@echo "Generated $(coverage_dir)/html/main.html";
 .PHONY: coverage
 
-acceptance:
+acceptance: clear-cache
 	TF_ACC_CONFIG_PATH=$(shell pwd)	\
 	TF_ACC_CONFIG=prod \
 	TF_ACC=true go test -v -timeout=18000s -cover ./... 2>&1 | tee result.txt;
@@ -92,7 +92,7 @@ acceptance:
 	@echo "Tests Passed";
 	rm -r result.txt
 
-acceptance-short:
+acceptance-short: clear-cache
 	TF_ACC_CONFIG_PATH=$(shell pwd)	\
 	TF_ACC_CONFIG=prod \
 	TF_ACC=true go test -v -timeout=120s -short -cover ./... 2>&1 | tee result.txt;
@@ -106,6 +106,10 @@ acceptance-short:
 
 build: vendor $(NAME)
 .PHONY: build
+
+clear-cache:
+	go clean -testcache
+.PHONY: clear-cache
 
 install: build $(NAME)
 	# terraform >= v0.13
