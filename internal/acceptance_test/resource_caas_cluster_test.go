@@ -28,6 +28,8 @@ const (
 	defaultWorkerNode       = "worker"
 	osVersionUpdate         = "15.3"
 	kubernetesVersionUpdate = "1.23.13-hpe2"
+	scaleWorkerMinSize      = "2"
+	scaleWorkerMaxSize      = "4"
 	//apiURL         = "https://mcaas.us1.greenlake-hpe.com/mcaas"
 )
 
@@ -93,13 +95,14 @@ func testCaasClusterUpdate(clusterName string) string {
 		worker_nodes {
 			name = "%s"
 			machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
-			count = "1"
+			min_size = "%s"
+			max_size = "%s"
 		  }
         timeouts {
 			create = "2h"
             update = "2h"
 		}
-	}`, apiURL, siteName, clusterName, testWorkerNode)
+	}`, apiURL, siteName, clusterName, testWorkerNode, scaleWorkerMinSize, scaleWorkerMaxSize)
 }
 
 func testCaasClusterOsVersionUpdate(clusterName string) string {
@@ -133,7 +136,8 @@ func testCaasClusterOsVersionUpdate(clusterName string) string {
 		worker_nodes {
 			name = "%s"
 			machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
-			count = "1"
+			min_size = "%s"
+			max_size = "%s"
             os_version = "%s"
             os_image = "%s"
 		  }
@@ -141,7 +145,7 @@ func testCaasClusterOsVersionUpdate(clusterName string) string {
 			create = "2h"
             update = "2h"
 		}
-	}`, apiURL, siteName, clusterName, defaultWorkerNode, osVersionUpdate, osImage)
+	}`, apiURL, siteName, clusterName, defaultWorkerNode, scaleWorkerMinSize, scaleWorkerMaxSize, osVersionUpdate, osImage)
 }
 
 func testCaasClusterk8sVersionUpdate(clusterName string) string {
@@ -264,7 +268,7 @@ func checkCaasClusterUpdate(name string) resource.TestCheckFunc {
 		}
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 		field := "spaceID eq " + spaceID
-		cluster, _, err := p.CaasClient.ClustersApi.V1ClustersIdGet(clientCtx, id, field, nil)
+		cluster, _, err := p.CaasClient.ClustersApi.V1ClustersIdGet(clientCtx, id, field)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster list %w", err)
 		}
@@ -305,7 +309,7 @@ func checkCaasClusterOsVersionUpdate(name string) resource.TestCheckFunc {
 		}
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 		field := "spaceID eq " + spaceID
-		cluster, _, err := p.CaasClient.ClustersApi.V1ClustersIdGet(clientCtx, id, field, nil)
+		cluster, _, err := p.CaasClient.ClustersApi.V1ClustersIdGet(clientCtx, id, field)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster list %w", err)
 		}
@@ -348,7 +352,7 @@ func checkCaasClusterk8sVerionUpgrade(name string) resource.TestCheckFunc {
 		}
 		clientCtx := context.WithValue(ctx, mcaasapi.ContextAccessToken, token)
 		field := "spaceID eq " + spaceID
-		cluster, _, err := p.CaasClient.ClustersApi.V1ClustersIdGet(clientCtx, id, field, nil)
+		cluster, _, err := p.CaasClient.ClustersApi.V1ClustersIdGet(clientCtx, id, field)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster list %w", err)
 		}
@@ -386,7 +390,7 @@ func testCaasClusterDestroy(name string) resource.TestCheckFunc {
 
 		var cluster *mcaasapi.Cluster
 		field := "spaceID eq " + spaceID
-		clusters, _, err := p.CaasClient.ClustersApi.V1ClustersGet(clientCtx, field, nil)
+		clusters, _, err := p.CaasClient.ClustersApi.V1ClustersGet(clientCtx, field)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster list %w", err)
 		}

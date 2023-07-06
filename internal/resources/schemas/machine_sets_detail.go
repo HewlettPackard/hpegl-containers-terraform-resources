@@ -13,11 +13,6 @@ func MachineSetsDetail() map[string]*schema.Schema {
 			ForceNew: true,
 			Computed: true,
 		},
-		"machine_blueprint_id": {
-			Type:     schema.TypeString,
-			ForceNew: true,
-			Computed: true,
-		},
 		"os_image": {
 			Type:     schema.TypeString,
 			ForceNew: true,
@@ -28,7 +23,12 @@ func MachineSetsDetail() map[string]*schema.Schema {
 			ForceNew: true,
 			Computed: true,
 		},
-		"count": {
+		"min_size": {
+			Type:     schema.TypeFloat,
+			ForceNew: true,
+			Computed: true,
+		},
+		"max_size": {
 			Type:     schema.TypeFloat,
 			ForceNew: true,
 			Computed: true,
@@ -103,10 +103,10 @@ func FlattenMachineSetsDetail(machineSet *[]mcaasapi.MachineSetDetail) []interfa
 		mcset := make(map[string]interface{})
 
 		mcset["name"] = machine.Name
-		mcset["machine_blueprint_id"] = machine.MachineBlueprintId
 		mcset["os_image"] = machine.OsImage
 		mcset["os_version"] = machine.OsVersion
-		mcset["count"] = machine.Count
+		mcset["min_size"] = machine.MinSize
+		mcset["max_size"] = machine.MaxSize
 		mcset["machine_provider"] = machine.MachineProvider
 		mcset["machine_roles"] = machine.MachineRoles
 		mcset["compute_type"] = machine.ComputeInstanceType

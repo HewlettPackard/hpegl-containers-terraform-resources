@@ -50,7 +50,11 @@ func ClusterBlueprintCreate() map[string]*schema.Schema {
 						Type:     schema.TypeString,
 						Required: true,
 					},
-					"count": {
+					"min_size": {
+						Type:     schema.TypeFloat,
+						Required: true,
+					},
+					"max_size": {
 						Type:     schema.TypeFloat,
 						Required: true,
 					},

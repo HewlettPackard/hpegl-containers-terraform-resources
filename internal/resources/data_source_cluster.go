@@ -45,7 +45,7 @@ func dataSourceClusterReadContext(ctx context.Context, d *schema.ResourceData, m
 
 	spaceID := d.Get("space_id").(string)
 	field := "spaceID eq " + spaceID
-	clusters, resp, err := c.CaasClient.ClustersApi.V1ClustersGet(clientCtx, field, nil)
+	clusters, resp, err := c.CaasClient.ClustersApi.V1ClustersGet(clientCtx, field)
 	if err != nil {
 		return diag.FromErr(err)
 	}

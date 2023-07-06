@@ -25,7 +25,9 @@ const (
 	clusterProvider     = "ecp"
 	cpCount             = "1"
 	workerName          = "worker1"
-	workerCount         = "1"
+	//workerCount         = "1"
+	workerMinSize = "1"
+	workerMaxSize = "1"
 	//kubernetesVersion   = "1.24.10-hpe1"
 	apiURLCbp   = "https://mcaas.intg.hpedevops.net/mcaas"
 	siteNameCBp = "FTC"
@@ -72,9 +74,10 @@ func testCaasClusterBlueprint() string {
   		worker_nodes {
 			name = "%s"
       		machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
-      		count = "%s"
+			min_size = "%s"
+			max_size = "%s"
     	}
-	}`, apiURLCbp, siteNameCBp, name, r.Int63n(99999999), defaultStorageClass, clusterProvider, cpCount, workerName, workerCount)
+	}`, apiURLCbp, siteNameCBp, name, r.Int63n(99999999), defaultStorageClass, clusterProvider, cpCount, workerName, workerMinSize, workerMaxSize)
 }
 
 func TestCaasClusterBlueprintCreate(t *testing.T) {
@@ -142,7 +145,7 @@ func testCaasClusterBlueprintDestroy(name string) resource.TestCheckFunc {
 
 		var clusterBlueprint *mcaasapi.ClusterBlueprint
 		field := "applianceID eq " + siteID
-		clusterBlueprints, _, err := p.CaasClient.ClusterBlueprintsApi.V1ClusterblueprintsGet(clientCtx, field, nil)
+		clusterBlueprints, _, err := p.CaasClient.ClusterBlueprintsApi.V1ClusterblueprintsGet(clientCtx, field)
 		if err != nil {
 			return fmt.Errorf("Error in getting cluster blueprint list %w", err)
 		}

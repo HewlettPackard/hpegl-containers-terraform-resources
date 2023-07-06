@@ -185,7 +185,8 @@ func getWorkerNodeDetails(d *schema.ResourceData, workerNode map[string]interfac
 	}
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: workerNode["machine_blueprint_id"].(string),
-		Count:              int32(workerNode["count"].(float64)),
+		MinSize:            int32(workerNode["min_size"].(float64)),
+		MaxSize:            int32(workerNode["max_size"].(float64)),
 		Name:               workerNode["name"].(string),
 		OsImage:            osImage,
 		OsVersion:          osVersion,
