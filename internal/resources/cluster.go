@@ -165,7 +165,7 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		if err != nil {
 			return diag.Errorf("Error in parsing machinesets response %s", err)
 		}
-		var finalMachineSets []mcaasapi.AllOfUpdateClusterMachineSetsItems
+		var finalMachineSets []mcaasapi.UpdateClusterMachineSet
 		_ = json.Unmarshal(temp, &finalMachineSets)
 
 		//Check if kubernetesVersion update is present
@@ -538,7 +538,7 @@ func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		if err != nil {
 			return diag.Errorf("Error in parsing machinesets response %s", err)
 		}
-		var finalMachineSets []mcaasapi.AllOfUpdateClusterMachineSetsItems
+		var finalMachineSets []mcaasapi.UpdateClusterMachineSet
 		_ = json.Unmarshal(temp, &finalMachineSets)
 		//Check if kubernetesVersion update is present
 		newK8sVersion := ""
@@ -624,14 +624,15 @@ func getDefaultMachineSetDetail(defaultMachineSetDetail map[string]interface{}) 
 	for _, v := range mr {
 		MachineRoles = append(MachineRoles, mcaasapi.MachineRolesType(v.(string)))
 	}
-
+	macProvider := defaultMachineSetDetail["machine_provider"].(interface{})
+	machineProvider := mcaasapi.MachineProviderName(macProvider.(string))
 	wnd := mcaasapi.MachineSetDetail{
 		Name:                defaultMachineSetDetail["name"].(string),
 		OsImage:             defaultMachineSetDetail["os_image"].(string),
 		OsVersion:           defaultMachineSetDetail["os_version"].(string),
 		Count:               int32(defaultMachineSetDetail["count"].(float64)),
 		MachineRoles:        MachineRoles,
-		MachineProvider:     defaultMachineSetDetail["machine_provider"].(string),
+		MachineProvider:     &machineProvider,
 		Size:                defaultMachineSetDetail["size"].(string),
 		ComputeInstanceType: defaultMachineSetDetail["compute_type"].(string),
 		StorageInstanceType: defaultMachineSetDetail["storage_type"].(string),

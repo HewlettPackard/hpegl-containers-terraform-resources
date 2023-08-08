@@ -61,13 +61,13 @@ func machineBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	workerType := mcaasapi.MachineWorkerType(d.Get("worker_type").(string))
-
+	machineProvider := mcaasapi.MachineProviderName(d.Get("machine_provider").(string))
 	createMachineBlueprint := mcaasapi.MachineBlueprint{
 
 		Name:                d.Get("name").(string),
 		ApplianceID:         d.Get("site_id").(string),
 		MachineRoles:        machineRolesStr,
-		MachineProvider:     d.Get("machine_provider").(string),
+		MachineProvider:     &machineProvider,
 		OsImage:             d.Get("os_image").(string),
 		OsVersion:           d.Get("os_version").(string),
 		ComputeInstanceType: d.Get("compute_type").(string),
@@ -105,7 +105,7 @@ func machineBlueprintReadContext(ctx context.Context, d *schema.ResourceData, me
 	id := d.Id()
 	applianceID := d.Get("site_id").(string)
 	field := "applianceID eq " + applianceID
-	machineBlueprint, resp, err := c.CaasClient.MachineBlueprintsApi.V1MachineblueprintsIdGet(clientCtx, id, field, nil)
+	machineBlueprint, resp, err := c.CaasClient.MachineBlueprintsApi.V1MachineblueprintsIdGet(clientCtx, id, field)
 	if err != nil {
 		return diag.FromErr(err)
 	}

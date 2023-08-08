@@ -11,25 +11,25 @@ func GetErrorMessage(err error, statusCode int) string {
 	model := swaggerErr.Model()
 	switch statusCode {
 	case 400:
-		badRequestModel, ok := model.(mcaasapi.BadRequestError)
+		badRequestModel, ok := model.(mcaasapi.ModelError)
 		if !ok {
 			return ""
 		}
 		return badRequestModel.Message
 	case 401:
-		authErrorModel, ok := model.(mcaasapi.AuthenticationError)
+		authErrorModel, ok := model.(mcaasapi.ModelError)
 		if !ok {
 			return ""
 		}
 		return authErrorModel.Message
 	case 422:
-		unprocessingEntityModel, ok := model.(mcaasapi.UnprocessingEntityError)
+		unprocessingEntityModel, ok := model.(mcaasapi.ModelError)
 		if !ok {
 			return ""
 		}
 		return unprocessingEntityModel.Message
 	case 500:
-		internalErrorModel, ok := model.(mcaasapi.InternalError)
+		internalErrorModel, ok := model.(mcaasapi.ModelError)
 		if !ok {
 			return ""
 		}
