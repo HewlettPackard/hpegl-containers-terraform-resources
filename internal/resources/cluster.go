@@ -624,7 +624,7 @@ func getDefaultMachineSetDetail(defaultMachineSetDetail map[string]interface{}) 
 	for _, v := range mr {
 		MachineRoles = append(MachineRoles, mcaasapi.MachineRolesType(v.(string)))
 	}
-	macProvider := defaultMachineSetDetail["machine_provider"].(interface{})
+	macProvider := defaultMachineSetDetail["machine_provider"]
 	machineProvider := mcaasapi.MachineProviderName(macProvider.(string))
 	wnd := mcaasapi.MachineSetDetail{
 		Name:                defaultMachineSetDetail["name"].(string),
