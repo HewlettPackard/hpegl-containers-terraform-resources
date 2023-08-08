@@ -128,7 +128,7 @@ func testCaasMachineBlueprintDestroy(name string) resource.TestCheckFunc {
 
 		var machineBlueprint *mcaasapi.MachineBlueprint
 		field := "applianceID eq " + siteID
-		machineBlueprints, _, err := p.CaasClient.MachineBlueprintsApi.V1MachineblueprintsGet(clientCtx, field, nil)
+		machineBlueprints, _, err := p.CaasClient.MachineBlueprintsApi.V1MachineblueprintsGet(clientCtx, field)
 		if err != nil {
 			return fmt.Errorf("Error in getting machine blueprint list %w", err)
 		}
