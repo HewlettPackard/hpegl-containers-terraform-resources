@@ -611,7 +611,8 @@ func getDefaultMachineSet(d *schema.ResourceData, defaultMachineSet map[string]i
 	}
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: defaultMachineSet["machine_blueprint_id"].(string),
-		Count:              int32(defaultMachineSet["count"].(float64)),
+		MinSize:            int32(defaultMachineSet["min_size"].(float64)),
+		MaxSize:            int32(defaultMachineSet["max_size"].(float64)),
 		Name:               defaultMachineSet["name"].(string),
 		OsImage:            osImage,
 		OsVersion:          osVersion,
@@ -630,7 +631,8 @@ func getDefaultMachineSetDetail(defaultMachineSetDetail map[string]interface{}) 
 		Name:                defaultMachineSetDetail["name"].(string),
 		OsImage:             defaultMachineSetDetail["os_image"].(string),
 		OsVersion:           defaultMachineSetDetail["os_version"].(string),
-		Count:               int32(defaultMachineSetDetail["count"].(float64)),
+		MinSize:             int32(defaultMachineSetDetail["min_size"].(float64)),
+		MaxSize:             int32(defaultMachineSetDetail["max_size"].(float64)),
 		MachineRoles:        MachineRoles,
 		MachineProvider:     &machineProvider,
 		Size:                defaultMachineSetDetail["size"].(string),
