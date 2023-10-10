@@ -39,6 +39,15 @@ func testCaasClusterBlueprint() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	return fmt.Sprintf(`
+	terraform {
+	  required_providers {
+		hpegl = {
+		  source = "HPE/hpegl"
+		  version = ">= 0.1.0"
+		}
+	  }
+	}
+
 	provider hpegl {
 		caas {
 			api_url = "%s"
