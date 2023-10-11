@@ -32,16 +32,6 @@ func MachineBlueprint() map[string]*schema.Schema {
 			ForceNew: true,
 			Computed: true,
 		},
-		"os_image": {
-			Type:     schema.TypeString,
-			ForceNew: true,
-			Computed: true,
-		},
-		"os_version": {
-			Type:     schema.TypeString,
-			ForceNew: true,
-			Computed: true,
-		},
 		"size": {
 			Type:     schema.TypeString,
 			ForceNew: true,

@@ -32,7 +32,7 @@ func MachineBlueprint() *schema.Resource {
 		Description: `The machine blueprint resource facilitates the creation and
 			deletion of a CaaS machine blueprint.  Update is currently not supported. The
 			required inputs when creating a cluster blueprint are name,
-			site-id, machine_provider, machine_roles, os_image, os_version, compute_type, size and storage_type`,
+			site-id, machine_provider, machine_roles, compute_type, size and storage_type`,
 	}
 }
 
@@ -68,8 +68,6 @@ func machineBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 		ApplianceID:         d.Get("site_id").(string),
 		MachineRoles:        machineRolesStr,
 		MachineProvider:     &machineProvider,
-		OsImage:             d.Get("os_image").(string),
-		OsVersion:           d.Get("os_version").(string),
 		ComputeInstanceType: d.Get("compute_type").(string),
 		Size:                d.Get("size").(string),
 		StorageInstanceType: d.Get("storage_type").(string),
@@ -150,14 +148,6 @@ func writeMachineBlueprintResourceValues(d *schema.ResourceData, machineBlueprin
 	}
 
 	if err = d.Set("machine_roles", machineBlueprint.MachineRoles); err != nil {
-		return err
-	}
-
-	if err = d.Set("os_image", machineBlueprint.OsImage); err != nil {
-		return err
-	}
-
-	if err = d.Set("os_version", machineBlueprint.OsVersion); err != nil {
 		return err
 	}
 

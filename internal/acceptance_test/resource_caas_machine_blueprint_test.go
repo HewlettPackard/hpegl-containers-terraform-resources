@@ -20,8 +20,6 @@ const (
 	// Fill in these values based on the environment being used for acceptance testing
 	nameMbp         = "test-machine-bp"
 	machineProvider = "vmaas"
-	osImage         = "sles-custom"
-	osVersion       = "15"
 	computeType     = "General Purpose"
 	size            = "G1-CN-xLarge"
 	storageType     = "General Purpose"
@@ -54,13 +52,11 @@ func testCaasMachineBlueprint() string {
   		site_id = data.hpegl_caas_site.blr.id
   		machine_roles = %q
 		machine_provider = "%s"
-		os_image = "%s"
-		os_version = "%s"
 		compute_type = "%s"
 		size = "%s"
 		storage_type = "%s"
         worker_type = "%s"
-	}`, apiURLMBp, siteNameMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, osImage, osVersion, computeType, size, storageType, workerType)
+	}`, apiURLMBp, siteNameMbp, nameMbp, r.Int63n(99999999), machineRoles, machineProvider, computeType, size, storageType, workerType)
 }
 
 func TestCaasMachineBlueprintCreate(t *testing.T) {

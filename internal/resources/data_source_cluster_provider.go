@@ -45,7 +45,7 @@ func dataSourceClusterProviderReadContext(ctx context.Context, d *schema.Resourc
 
 	applianceID := d.Get("site_id").(string)
 
-	clusterProviders, resp, err := c.CaasClient.ClusterProvidersApi.V1AppliancesIdClusterprovidersGet(clientCtx, applianceID)
+	clusterProviders, resp, err := c.CaasClient.ClusterProvidersApi.V1AppliancesIdClusterprovidersGet(clientCtx, applianceID, nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}

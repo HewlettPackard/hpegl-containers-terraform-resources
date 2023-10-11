@@ -44,7 +44,5 @@ resource hpegl_caas_cluster test {
       machine_blueprint_id = data.hpegl_caas_machine_blueprint.mbworker.id
       min_size = ""
       max_size = ""
-      os_image = "sles-custom"
-      os_version = "15.3"
     }
 }
