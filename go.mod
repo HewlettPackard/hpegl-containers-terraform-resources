@@ -3,7 +3,7 @@ module github.com/HewlettPackard/hpegl-containers-terraform-resources
 go 1.19
 
 require (
-	github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.15
+	github.com/HewlettPackard/hpegl-containers-go-sdk v0.0.16
 	github.com/golang/mock v1.6.0
 	github.com/hashicorp/terraform-plugin-docs v0.10.1
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.17.0
@@ -15,6 +15,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Masterminds/sprig/v3 v3.2.2 // indirect
 	github.com/agext/levenshtein v1.2.2 // indirect
+	github.com/antihax/optional v1.0.0 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect

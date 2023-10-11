@@ -18,16 +18,6 @@ func MachineSets() map[string]*schema.Schema {
 			ForceNew: true,
 			Computed: true,
 		},
-		"os_image": {
-			Type:     schema.TypeString,
-			ForceNew: true,
-			Computed: true,
-		},
-		"os_version": {
-			Type:     schema.TypeString,
-			ForceNew: true,
-			Computed: true,
-		},
 		"min_size": {
 			Type:     schema.TypeFloat,
 			ForceNew: true,
@@ -52,8 +42,6 @@ func FlattenMachineSets(machineSet *[]mcaasapi.MachineSet) []interface{} {
 
 		mcset["name"] = machine.Name
 		mcset["machine_blueprint_id"] = machine.MachineBlueprintId
-		mcset["os_image"] = machine.OsImage
-		mcset["os_version"] = machine.OsVersion
 		mcset["min_size"] = machine.MinSize
 		mcset["max_size"] = machine.MaxSize
 		machineSets[i] = mcset

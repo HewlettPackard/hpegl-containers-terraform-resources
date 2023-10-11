@@ -73,7 +73,8 @@ func Cluster() *schema.Resource {
 			deletion of a CaaS cluster. There are four required inputs when 
 			creating a cluster - name, blueprint_id, site_id and space_id. 
 			worker_nodes is an optional input to scale nodes on cluster.
-            OS Image update & Kubernetes version upgrade are also supported while updating the cluster.`,
+            Provide the min_size & max_size parameters to trigger Autoscaler.
+            Kubernetes version upgrade is also supported while updating the cluster.`,
 	}
 }
 
@@ -145,7 +146,7 @@ func clusterCreateContext(ctx context.Context, d *schema.ResourceData, meta inte
 		machineSets := []mcaasapi.MachineSet{}
 
 		for _, workerNode := range workerNodesList {
-			machineSets = append(machineSets, getWorkerNodeDetails(d, workerNode.(map[string]interface{})))
+			machineSets = append(machineSets, getWorkerNodeDetails(workerNode.(map[string]interface{})))
 		}
 
 		defaultMachineSets := cluster.MachineSets
@@ -514,14 +515,14 @@ func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta inte
 
 		workerNodes := d.Get("worker_nodes").([]interface{})
 		for _, workerNode := range workerNodes {
-			machineSets = append(machineSets, getWorkerNodeDetails(d, workerNode.(map[string]interface{})))
+			machineSets = append(machineSets, getWorkerNodeDetails(workerNode.(map[string]interface{})))
 		}
 
 		defaultMachineSetsInterface := d.Get("default_machine_sets").([]interface{})
 		defaultMachineSets := []mcaasapi.MachineSet{}
 
 		for _, dms := range defaultMachineSetsInterface {
-			defaultMachineSet := getDefaultMachineSet(d, dms.(map[string]interface{}))
+			defaultMachineSet := getDefaultMachineSet(dms.(map[string]interface{}))
 			defaultMachineSets = append(defaultMachineSets, defaultMachineSet)
 		}
 		defaultWorkersName, err := GetDefaultWorkersName(d)
@@ -578,44 +579,12 @@ func clusterUpdateContext(ctx context.Context, d *schema.ResourceData, meta inte
 	return clusterReadContext(ctx, d, meta)
 }
 
-func getDefaultMachineSet(d *schema.ResourceData, defaultMachineSet map[string]interface{}) mcaasapi.MachineSet {
-	//Use the updated os Image version in the update request body so that at the time of scale up/down, the update request body has the latest os image version.
-	osVersion := ""
-	osImage := ""
-	dwns, _ := GetDefaultWorkersName(d)
-	var found bool
-	for _, dwn := range dwns {
-		if defaultMachineSet["name"].(string) == dwn {
-			found = true
-			break
-		}
-	}
-	if found {
-		for _, dwn := range dwns {
-			if defaultMachineSet["name"].(string) == dwn {
-				machinesets := d.Get("machine_sets").([]interface{})
-				for _, machinesetInt := range machinesets {
-					machineset := machinesetInt.(map[string]interface{})
-					if dwn == machineset["name"] {
-						osVersion = fmt.Sprintf("%v", machineset["os_version"])
-						osImage = fmt.Sprintf("%v", machineset["os_image"])
-					}
-				}
-			}
-		}
-
-	} else {
-		osVersion = defaultMachineSet["os_version"].(string)
-		osImage = defaultMachineSet["os_image"].(string)
-
-	}
+func getDefaultMachineSet(defaultMachineSet map[string]interface{}) mcaasapi.MachineSet {
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: defaultMachineSet["machine_blueprint_id"].(string),
 		MinSize:            int32(defaultMachineSet["min_size"].(float64)),
 		MaxSize:            int32(defaultMachineSet["max_size"].(float64)),
 		Name:               defaultMachineSet["name"].(string),
-		OsImage:            osImage,
-		OsVersion:          osVersion,
 	}
 	return wn
 }
@@ -629,8 +598,6 @@ func getDefaultMachineSetDetail(defaultMachineSetDetail map[string]interface{}) 
 	machineProvider := mcaasapi.MachineProviderName(macProvider.(string))
 	wnd := mcaasapi.MachineSetDetail{
 		Name:                defaultMachineSetDetail["name"].(string),
-		OsImage:             defaultMachineSetDetail["os_image"].(string),
-		OsVersion:           defaultMachineSetDetail["os_version"].(string),
 		MinSize:             int32(defaultMachineSetDetail["min_size"].(float64)),
 		MaxSize:             int32(defaultMachineSetDetail["max_size"].(float64)),
 		MachineRoles:        MachineRoles,

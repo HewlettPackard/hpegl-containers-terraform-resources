@@ -4,7 +4,6 @@ package resources
 
 import (
 	"context"
-	"fmt"
 	"github.com/HewlettPackard/hpegl-containers-go-sdk/pkg/mcaasapi"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/internal/resources/schemas"
 	"github.com/HewlettPackard/hpegl-containers-terraform-resources/pkg/auth"
@@ -53,7 +52,7 @@ func clusterBlueprintCreateContext(ctx context.Context, d *schema.ResourceData, 
 	for _, workerNode := range workerNodesList {
 		worker, ok := workerNode.(map[string]interface{})
 		if ok {
-			workerNodeDetails := getWorkerNodeDetails(d, worker)
+			workerNodeDetails := getWorkerNodeDetails(worker)
 			machineSetsList = append(machineSetsList, workerNodeDetails)
 		}
 	}
@@ -165,31 +164,13 @@ func clusterBlueprintDeleteContext(ctx context.Context, d *schema.ResourceData, 
 	return diags
 }
 
-func getWorkerNodeDetails(d *schema.ResourceData, workerNode map[string]interface{}) mcaasapi.MachineSet {
-	osImage := ""
-	osVersion := ""
-	machines, ok := d.GetOk("machine_sets")
+func getWorkerNodeDetails(workerNode map[string]interface{}) mcaasapi.MachineSet {
 
-	osVersion = fmt.Sprintf("%v", workerNode["os_version"])
-	osImage = fmt.Sprintf("%v", workerNode["os_image"])
-
-	if osVersion == "" && osImage == "" && ok {
-		machinesets := machines.([]interface{})
-		for _, machinesetInt := range machinesets {
-			machineset := machinesetInt.(map[string]interface{})
-			if workerNode["name"] == machineset["name"] {
-				osVersion = fmt.Sprintf("%v", machineset["os_version"])
-				osImage = fmt.Sprintf("%v", machineset["os_image"])
-			}
-		}
-	}
 	wn := mcaasapi.MachineSet{
 		MachineBlueprintId: workerNode["machine_blueprint_id"].(string),
 		MinSize:            int32(workerNode["min_size"].(float64)),
 		MaxSize:            int32(workerNode["max_size"].(float64)),
 		Name:               workerNode["name"].(string),
-		OsImage:            osImage,
-		OsVersion:          osVersion,
 	}
 	return wn
 }

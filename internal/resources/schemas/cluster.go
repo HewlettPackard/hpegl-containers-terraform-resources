@@ -122,14 +122,6 @@ func Cluster() map[string]*schema.Schema {
 						Type:     schema.TypeFloat,
 						Required: true,
 					},
-					"os_version": {
-						Type:     schema.TypeString,
-						Optional: true,
-					},
-					"os_image": {
-						Type:     schema.TypeString,
-						Optional: true,
-					},
 				},
 			},
 		},
